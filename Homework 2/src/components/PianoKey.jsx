@@ -48,4 +48,6 @@ function PianoKey({ midi, noteName, isBlack, isPressed, onNoteOn, onNoteOff }) {
   );
 }
 
+// Default shallow comparison is intentional: callbacks must never be ignored.
+// Internal event handlers are created only when this key itself renders.
 export default memo(PianoKey);
