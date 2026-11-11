@@ -288,3 +288,50 @@ Add focused tests for counts, endpoints, uniqueness, black-key classification, a
 Added `generatePianoNotes()` and stable, immutable `pianoNotes` metadata in `Homework 2/src/music/notes.js`.
 
 All five tests passed: 88 unique notes, 52 white/36 black keys, names/octaves, frequencies including A4 = 440 Hz, and immutability. Production build passed. Updated the task plan and prompt log; no piano UI or audio was added.
+
+## 2026-11-12 — Silent accessible piano keyboard layout
+
+### Exact prompt received
+
+```text
+Build PianoKeyboard and PianoKey using the generated metadata.\
+\
+Requirements:\
+- Render keys with map and MIDI values as React keys.\
+- Use native buttons with readable accessible note names.\
+- Position black keys correctly relative to white keys.\
+- Accept a controlled isPressed prop and expose it through aria-pressed.\
+- Add visible focus and non-color pressed indicators.\
+- Make all 88 notes reachable through a documented keyboard-navigation approach.\
+- Use a labeled horizontal scrolling piano container.\
+- At 375px, only the piano container may scroll horizontally; the page and transport controls must fit the viewport.\
+\
+Do not connect audio yet.\
+Run the production build and inspect the layout if browser tools are available.
+```
+
+### Changes
+
+- Read the piano rules and reviewed current contracts, generated metadata, task plan, source, package scripts, and clean Git status before edits.
+- Added PianoKey.jsx with native type=button, stable readable note name, controlled isPressed/aria-pressed, visible Held marker, and white/black styling. Wrapped with React.memo using primitive props/default comparison; no performance measurement claimed.
+- Added PianoKeyboard.jsx: uses generated module-scope metadata, derives white/black grid positions once, and renders through map with note.midi as the React key. Each black key spans the boundary after its preceding white key; B/C and E/F have no black key inserted.
+- Added a labeled, focusable horizontal region and on-page navigation instructions: Tab/Shift+Tab traverses all notes in pitch order with native focused-element scrolling; region/scrollbar/swipe allow horizontal navigation.
+- Updated App to show the silent layout. Added contained grid/scroll styles, visible focus, hover feedback, and text/border pressed indicators. Kept white-key focus below the black-key overlay so focusing a white key does not cover neighboring black keys.
+- Removed the replaced component-folder placeholder. Updated Task 05 with evidence. Audio, interaction ownership, transport, and recording remain unconnected; transport controls do not exist yet and were not claimed tested.
+
+### Actual verification
+
+- PASS: npm.cmd test, all five metadata tests passed.
+- PASS: npm.cmd run build, 19 modules transformed; repeated after final CSS adjustment, 113ms.
+- PASS: real Edge at 375px confirmed 88 native unpressed buttons, 52 white/36 black, and correct geometric centering of every black key on adjacent white boundaries.
+- PASS: keyboard traversal focused every MIDI 21–108 with visible focus and scrolling into the piano viewport; Shift+Tab returned to MIDI 107. Document overflow checks passed at 375px and 1280px.
+- PASS: an ignored local preview fixture supplied pressed MIDI 60/61, verified aria-pressed/text feedback, then changed the controlled set and verified MIDI 60 released while 61 remained pressed. No audio was connected.
+- PASS: no browser console warnings/errors or uncaught page errors in these checks. Captured and visually inspected .npm-cache/piano-375.png; it shows the scrolled high-note end and visible B7 focus. Browser closed after checks.
+- PASS: git diff --check, with LF-to-CRLF warnings. No lint script. Actual input/audio behavior, physical devices, screen-reader announcements, transport reflow, and React DevTools render profiling remain NOT VERIFIED for later tasks.
+- Updated this log. No commits or pushes performed. Localhost remains available at http://127.0.0.1:5175/.
+
+### Assistant response
+
+Built `PianoKeyboard` and `PianoKey` from the generated metadata, with controlled pressed states, correctly positioned black keys, visible focus, and a labeled scrolling container.
+
+All 88 notes are reachable using Tab/Shift+Tab. Browser checks at 375px and 1280px, five tests, and the production build passed. Updated the task plan and prompt log. Audio remains disconnected.

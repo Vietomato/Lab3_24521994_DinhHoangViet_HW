@@ -192,7 +192,7 @@ metadata is exported once at module scope; keyboard rendering is a later task.
 
 ## Task 05 — Accessible keyboard layout
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify the silent keyboard layout (2026-11-12).
 
 **Scope:** Render notes from metadata with correct white/black placement and MIDI keys. Build native-button PianoKey and a contained horizontal piano viewport. Add labels, focus, pressed indicators, and keyboard navigation.
 
@@ -201,6 +201,14 @@ metadata is exported once at module scope; keyboard rendering is a later task.
 **Acceptance:** All 88 notes reachable; controls fit 375px; scrolling remains inside the piano container.
 
 **Verification:** Build, visual endpoint checks, narrow viewport, Tab/arrows where implemented, and focus visibility.
+
+Evidence: five metadata tests and production build passed. Actual Edge checks
+verified 88 native buttons, 52/36 white/black split, black-key boundary alignment,
+Tab access and automatic scroll visibility for every MIDI 21–108, reverse Tab,
+controlled pressed props, visible focus, and no document overflow at 375/1280px.
+Inspected a 375px screenshot. Navigation is documented on the page. Audio/input
+ownership and transport controls are not connected yet; their tests remain for
+later tasks. PianoKey uses memo, but update-render profiling is still NOT VERIFIED.
 
 **Suggested commit:** `feat: build accessible 88-key piano layout`
 

@@ -1,4 +1,6 @@
-/** Semantic shell. Piano and transport features are implemented in later tasks. */
+import PianoKeyboard from './components/PianoKeyboard.jsx';
+
+/** Piano layout preview; audio and transport are implemented in later tasks. */
 export default function App() {
   return (
     <>
@@ -10,7 +12,7 @@ export default function App() {
       <main id="main-content" tabIndex={-1}>
         <section aria-labelledby="piano-heading">
           <h2 id="piano-heading">Your piano</h2>
-          <p>The piano keyboard, audio, and recording controls will be added in the next steps.</p>
+          <PianoKeyboard />
         </section>
       </main>
     </>
