@@ -2,6 +2,8 @@
 node_modules/
 dist/
 .npm-cache/
+test-results/
+playwright-report/
 
 # Local environment configuration; keep safe example/template files visible
 .env

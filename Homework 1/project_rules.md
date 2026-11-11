@@ -1,3 +1,4 @@
+# LLM IDE: Codex - GPT 6.1 Sol Medium Level.
 # Production Studio Drum Kit — Project Rules
 
 ## 1. Scope and stack

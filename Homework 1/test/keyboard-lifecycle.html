@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><link rel="icon" href="/favicon.svg"><title>Keyboard hook lifecycle fixture</title></head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React, { StrictMode } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import { useDrumKeyboard } from '/src/hooks/useDrumKeyboard.js';
+      import { drumPads } from '/src/config/drumPads.js';
+      window.keyboardCalls = [];
+      window.keyboardRegistrations = [];
+      for (const target of [window, document]) {
+        for (const [method, action] of [['addEventListener', 'add'], ['removeEventListener', 'remove']]) {
+          const original = target[method].bind(target);
+          target[method] = (type, callback, ...options) => {
+            if (['keydown', 'keyup', 'blur', 'visibilitychange'].includes(type)) keyboardRegistrations.push(action);
+            return original(type, callback, ...options);
+          };
+        }
+      }
+      const padMap = new Map(drumPads.map(pad => [pad.code, pad]));
+      function Harness({ enabled, version }) {
+        useDrumKeyboard({ padMap, isEnabled: enabled,
+          onActivate: pad => keyboardCalls.push(['down', pad.id, version]),
+          onRelease: padId => keyboardCalls.push(['up', padId, version]),
+        });
+        return React.createElement('p', null, version);
+      }
+      window.keyboardRoot = createRoot(document.getElementById('root'));
+      window.renderKeyboard = (enabled, version) => keyboardRoot.render(
+        React.createElement(StrictMode, null, React.createElement(Harness, { enabled, version })));
+      renderKeyboard(true, 1);
+    </script>
+  </body>
+</html>

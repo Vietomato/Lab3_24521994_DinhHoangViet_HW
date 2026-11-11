@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.svg"><title>Studio lifecycle test fixture</title></head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React, { StrictMode, Profiler } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import App from '/src/App.jsx';
+      import '/src/styles/drum-studio.css';
+      window.commits = 0;
+      window.testRoot = createRoot(document.getElementById('root'));
+      testRoot.render(React.createElement(StrictMode, null,
+        React.createElement(Profiler, { id: 'studio', onRender: () => window.commits++ }, React.createElement(App))));
+    </script>
+  </body>
+</html>
