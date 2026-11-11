@@ -63,6 +63,9 @@ main > section + section { margin-top: 1.5rem; }
 }
 .transport-actions button:disabled { opacity: 0.55; cursor: default; }
 .recorded-notes { padding-left: 1.5rem; }
+.transport-speed { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+.transport-speed select { min-height: 2.75rem; padding: 0.4rem; font: inherit; }
+.piano-key:disabled { cursor: default; }
 
 .piano-viewport {
   max-width: 100%;

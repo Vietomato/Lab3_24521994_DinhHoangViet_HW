@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 const ignore = () => {};
+const allow = () => true;
 
 /** Own live input independently from audio allocation, including stolen holds. */
-export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoiceEnd, onLiveNoteOn = ignore, onLiveNoteOff = ignore }) {
+export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoiceEnd, onLiveNoteOn = ignore, onLiveNoteOff = ignore, canPlayLive = allow }) {
   const held = useRef(new Map());
   const mounted = useRef(false);
   const [pressedMidi, setPressedMidi] = useState(() => new Set());
@@ -33,7 +34,7 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
   }, [onNoteOff]);
 
   const onNoteOn = useCallback((midi, ownerId, durationMs) => {
-    if (held.current.has(ownerId)) return;
+    if (!canPlayLive() || held.current.has(ownerId)) return;
     const input = { midi, controller: new AbortController(), voice: null, timer: null };
     held.current.set(ownerId, input);
     onLiveNoteOn(midi, ownerId);
@@ -49,7 +50,7 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
       // Assistive clicks have no held key/pointer. Give them a short audible pulse.
       if (durationMs !== undefined) input.timer = setTimeout(() => onNoteOff(midi, ownerId), durationMs);
     });
-  }, [noteOn, noteOff, onNoteOff, synchronize, onLiveNoteOn, onLiveNoteOff]);
+  }, [noteOn, noteOff, onNoteOff, synchronize, onLiveNoteOn, onLiveNoteOff, canPlayLive]);
 
   const onVoiceEnd = useCallback(event => {
     for (const ownerId of event.ownerIds) onLiveNoteOff(ownerId, event.endedAtMs);
@@ -71,5 +72,5 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
     };
   }, [subscribeVoiceEnd, onVoiceEnd, clearHeld]);
 
-  return { pressedMidi, onNoteOn, onNoteOff, clearHeld };
+  return { pressedMidi, onNoteOn, onNoteOff, clearHeld, refreshPressed: synchronize };
 }

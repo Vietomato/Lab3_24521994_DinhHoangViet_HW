@@ -14,7 +14,7 @@ const positionedNotes = pianoNotes.map((note) => {
  * @param {{ pressedMidi: ReadonlySet<number>, onNoteOn: import('../types.js').NoteOnCallback,
  * onNoteOff: import('../types.js').NoteOffCallback }} props
  */
-export default function PianoKeyboard({ pressedMidi, onNoteOn, onNoteOff }) {
+export default function PianoKeyboard({ pressedMidi, onNoteOn, onNoteOff, disabled = false }) {
   const instructionsId = useId();
   return (
     <>
@@ -24,6 +24,7 @@ export default function PianoKeyboard({ pressedMidi, onNoteOn, onNoteOff }) {
         to scroll, or use the scrollbar or swipe. Hold a key with mouse, touch,
         pen, Enter, or Space. Up to eight pitches can sound at once; the oldest
         is stolen at capacity and stays silent until released and pressed again.
+        Live keys are disabled during replay.
       </p>
       <div className="piano-viewport" role="region" aria-label="88-key piano, A0 to C8"
         aria-describedby={instructionsId} tabIndex={0}>
@@ -32,7 +33,7 @@ export default function PianoKeyboard({ pressedMidi, onNoteOn, onNoteOff }) {
             <div key={note.midi} className={`piano-key-slot ${note.isBlack ? 'piano-key-slot--black' : ''}`}
               style={style}>
               <PianoKey midi={note.midi} noteName={note.noteName} isBlack={note.isBlack}
-                isPressed={pressedMidi.has(note.midi)} onNoteOn={onNoteOn} onNoteOff={onNoteOff} />
+                isPressed={pressedMidi.has(note.midi)} onNoteOn={onNoteOn} onNoteOff={onNoteOff} disabled={disabled} />
             </div>
           ))}
         </div>

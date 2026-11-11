@@ -9,6 +9,14 @@ npm.cmd run test:browser
 npm.cmd run build
 ```
 
+`AudioTaskQueue.test.js` uses a deterministic monotonic fake clock to check replay
+onset targets, independent releases, 0.5x/1x/2x timing, immutable snapshots,
+validation, cleanup, and completion after release tails. `playback.spec.js` checks
+the real-browser Record/Play flow, replay visuals, live-input/transport gates,
+next-run speed selection, unchanged saved notes and 375px layout. Automated signal
+and state checks do not establish audible quality. The explicit Stop Sequence
+button and AbortController race tests belong to the following stage.
+
 `npm test` runs the Node metadata/audio tests. `test:browser` runs the input suite
 using installed Microsoft Edge, starting its own Vite server on port 5176.
 Set `PLAYWRIGHT_CHANNEL` to select another installed compatible browser channel.

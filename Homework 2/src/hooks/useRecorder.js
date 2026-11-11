@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PianoRecorder } from '../sequencer/recording.js';
 
-/** Recorder state owns the transport until replay is added in the next stage. */
+/** Shared idle/recording/playing gate, enforced beyond disabled UI controls. */
 export function useRecorder() {
   const recorderRef = useRef(null);
   const owners = useRef(new Map());
+  const stateRef = useRef('idle');
   const [state, setState] = useState('idle');
   const [events, setEvents] = useState(() => Object.freeze([]));
   const [error, setError] = useState(null);
@@ -35,32 +36,44 @@ export function useRecorder() {
 
   const startRecording = useCallback(() => {
     const recorder = recorderRef.current;
-    if (!recorder || recorder.isRecording) return;
+    if (!recorder || stateRef.current !== 'idle') return;
     try {
       recorder.start(performance.now());
       owners.current.clear();
       setEvents(recorder.getEvents());
       setError(null);
+      stateRef.current = 'recording';
       setState('recording');
     } catch (cause) { setError(cause.message); }
   }, []);
 
   const stopRecording = useCallback(() => {
     const recorder = recorderRef.current;
-    if (!recorder?.isRecording) return;
+    if (!recorder?.isRecording || stateRef.current !== 'recording') return;
     try {
       setEvents(recorder.stop(performance.now()));
       owners.current.clear();
+      stateRef.current = 'idle';
       setState('idle');
     } catch (cause) { setError(cause.message); }
   }, []);
 
   const clearRecording = useCallback(() => {
     const recorder = recorderRef.current;
-    if (!recorder || recorder.isRecording) return;
+    if (!recorder || stateRef.current !== 'idle') return;
     recorder.clear();
     setEvents(recorder.getEvents());
   }, []);
 
-  return { state, events, error, startRecording, stopRecording, clearRecording, onLiveNoteOn, onLiveNoteOff };
+  const beginPlayback = useCallback(() => {
+    if (stateRef.current !== 'idle') return false;
+    stateRef.current = 'playing'; setState('playing'); return true;
+  }, []);
+  const endPlayback = useCallback(() => {
+    if (stateRef.current !== 'playing') return;
+    stateRef.current = 'idle'; setState('idle');
+  }, []);
+  const canPlayLive = useCallback(() => stateRef.current !== 'playing', []);
+  return { state, events, error, startRecording, stopRecording, clearRecording, onLiveNoteOn, onLiveNoteOff,
+    beginPlayback, endPlayback, canPlayLive };
 }

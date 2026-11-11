@@ -46,6 +46,7 @@
  * @property {boolean} isPressed Actual allocated/held state, cleared on stealing.
  * @property {NoteOnCallback} onNoteOn
  * @property {NoteOffCallback} onNoteOff
+ * @property {boolean} [disabled] Live input unavailable during replay.
  */
 
 /**
@@ -128,6 +129,7 @@
  * @property {InitializeAudio} initialize
  * @property {StartVoice} noteOn
  * @property {ReleaseVoice} noteOff
+ * @property {function(VoiceHandle): Promise<void>} waitForVoice Await this generation's bounded tail.
  * @property {SetVolume} setVolume
  * @property {StopAllVoices} stopAll
  * @property {DisposeAudio} dispose

@@ -144,6 +144,9 @@ export class PolyphonicSynth {
   /** @returns {ReadonlyArray<import('../types.js').VoiceHandle>} FIFO snapshot. */
   getActiveVoices() { return Object.freeze([...this.#active.values()]); }
 
+  /** Wait for this exact generation's release tail, without stopping other voices. */
+  waitForVoice(voice) { return this.#resources.get(voice)?.done ?? Promise.resolve(); }
+
   /**
    * Notify at logical release/steal/end, not again when its audio tail ends.
    * @param {function(import('../types.js').VoiceEndEvent): void} listener

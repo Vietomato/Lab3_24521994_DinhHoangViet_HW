@@ -4,7 +4,7 @@ import { memo } from 'react';
  * Native input handlers; audio and ownership remain in the hooks/engine.
  * @param {import('../types.js').PianoKeyProps} props
  */
-function PianoKey({ midi, noteName, isBlack, isPressed, onNoteOn, onNoteOff }) {
+function PianoKey({ midi, noteName, isBlack, isPressed, onNoteOn, onNoteOff, disabled = false }) {
   const nativeOwner = key => `native:${midi}:${key}`;
   const releasePointer = event => onNoteOff(midi, `pointer:${event.pointerId}`);
   return (
@@ -13,6 +13,7 @@ function PianoKey({ midi, noteName, isBlack, isPressed, onNoteOn, onNoteOff }) {
       className={`piano-key ${isBlack ? 'piano-key--black' : 'piano-key--white'}`}
       aria-label={`${noteName.replace('#', ' sharp ')} piano key`}
       aria-pressed={isPressed}
+      disabled={disabled}
       data-midi={midi}
       onPointerDown={event => {
         if (event.button !== 0) return;

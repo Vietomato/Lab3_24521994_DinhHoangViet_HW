@@ -43,5 +43,6 @@ export function usePianoAudio() {
   const noteOff = useCallback((voice, ownerId) => engineRef.current?.noteOff(voice, ownerId), []);
   const getActiveVoices = useCallback(() => engineRef.current?.getActiveVoices() ?? [], []);
   const subscribeVoiceEnd = useCallback(listener => engineRef.current?.subscribeVoiceEnd(listener) ?? (() => {}), []);
-  return { initialize, isReady, error, noteOn, noteOff, getActiveVoices, subscribeVoiceEnd };
+  const waitForVoice = useCallback(voice => engineRef.current?.waitForVoice(voice) ?? Promise.resolve(), []);
+  return { initialize, isReady, error, noteOn, noteOff, getActiveVoices, subscribeVoiceEnd, waitForVoice };
 }

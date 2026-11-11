@@ -309,7 +309,7 @@ All 16 unit/12 browser tests and build passed. See `test/render-results.md`.
 
 ## Task 10 — FIFO recording
 
-- [x] Implement and verify FIFO recording (2026-11-12; stage commit pending).
+- [x] Implement and verify FIFO recording (2026-11-12; commit `c012e08`).
 
 **Scope:** Add idle/recording transport and Record/Stop Recording/Clear controls. Use monotonic timestamps, preserve onset order, and finalize held or stolen notes correctly. Publish immutable RecordedNote events.
 
@@ -333,7 +333,7 @@ and cancellation stages remain pending; stages must be committed sequentially.
 
 ## Task 11 — Concurrent variable-speed replay
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify Stage 2 (2026-11-12; stage commit pending).
 
 **Scope:** Implement FIFO onset scheduling from cumulative target times. Schedule note-off independently with voice handles. Add 0.5x/1x/2x controls and transport ownership; disable live playing/recording during replay.
 
@@ -342,6 +342,19 @@ and cancellation stages remain pending; stages must be committed sequentially.
 **Acceptance:** Chords overlap; onset gaps and durations scale by speed; saved events are not consumed; completion waits for the final release.
 
 **Verification:** Use fake timers/clock to test event ordering, overlapping durations, all speeds, empty/invalid input, and natural completion. Verify audible replay separately.
+
+Evidence: the scheduler snapshots recorded events and speed, waits against
+cumulative monotonic targets, and schedules generation-specific releases
+independently. Completion waits for owned release tails. Live input/Record/Clear
+are guarded during playback; speed changes affect the next run; saved data is
+unchanged. All 32 unit tests, 15 browser tests and build passed. Fake-clock tests
+cover all speeds, FIFO overlap, snapshot isolation, timing validation/overflow,
+allocation delay, failure cleanup, and empty/concurrent/repeated Play. Browser
+checks cover real replayed chords, pressed visuals, all speeds, transport gates,
+natural completion and narrow layout. Two confirmed Stage 2 defects and fixes
+are in AI_FAILURE_AUDIT.md. Prompt logging is omitted at the user's request.
+Stage 3 AbortController/Stop Sequence/race tests remain pending; lifecycle cleanup
+currently uses an internal cancellation flag. Audible quality remains manual.
 
 **Suggested commit:** `feat: replay recorded chords at variable speeds`
 
