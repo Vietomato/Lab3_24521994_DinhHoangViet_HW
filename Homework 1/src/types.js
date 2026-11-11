@@ -21,6 +21,15 @@
 /** @typedef {DrumPad} DrumPadConfig */
 
 /**
+ * An accepted input event, not a guarantee of audible playback.
+ * @typedef {Object} HitEvent
+ * @property {string} id Unique stable event ID.
+ * @property {string} padId
+ * @property {string} label
+ * @property {number} timestampMs Unix epoch milliseconds at activation.
+ */
+
+/**
  * @typedef {Object} DrumPadProps
  * @property {DrumPad} pad
  * @property {boolean} isActive Parent-controlled momentary state, not a toggle.

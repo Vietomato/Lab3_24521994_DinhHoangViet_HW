@@ -45,6 +45,27 @@ main > section + section { margin-top: 1.5rem; }
 .shortcut-control input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
 .shortcut-control label { padding-block: 0.5rem; }
 
+.latest-hit { display: block; font-weight: 700; }
+.clear-history {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #8190a8;
+  border-radius: 0.4rem;
+  background: #1d293d;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.clear-history:hover:enabled { text-decoration: underline; }
+.clear-history:disabled { opacity: 0.6; cursor: default; }
+.hit-history { padding-left: 1.5rem; }
+.hit-history li { padding: 0.4rem 0; }
+.hit-history time {
+  display: block;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
 :focus-visible {
   outline: 3px solid #facc15;
   outline-offset: 4px;

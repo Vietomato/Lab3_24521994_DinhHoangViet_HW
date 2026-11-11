@@ -1,6 +1,7 @@
 import DrumPad from './components/DrumPad.jsx';
 import { useState } from 'react';
 import DrumControls from './components/DrumControls.jsx';
+import HitHistory from './components/HitHistory.jsx';
 import { drumPads } from './config/drumPads.js';
 import { useDrumAudio } from './hooks/useDrumAudio.js';
 import { useDrumActivation } from './hooks/useDrumActivation.js';
@@ -12,7 +13,7 @@ const padMap = new Map(drumPads.map((pad) => [pad.code, pad]));
 export default function App() {
   const { trigger, error, volume, setVolume } = useDrumAudio();
   const [shortcutsEnabled, setShortcutsEnabled] = useState(true);
-  const { activePadIds, onActivate, onRelease } = useDrumActivation(trigger);
+  const { activePadIds, onActivate, onRelease, history, clearHistory } = useDrumActivation(trigger);
   useDrumKeyboard({ padMap, isEnabled: shortcutsEnabled, onActivate, onRelease });
   return (
     <>
@@ -40,6 +41,7 @@ export default function App() {
             ))}
           </ul>
         </section>
+        <HitHistory history={history} onClear={clearHistory} />
       </main>
     </>
   );
