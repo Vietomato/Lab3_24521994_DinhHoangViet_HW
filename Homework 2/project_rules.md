@@ -6,8 +6,9 @@ Build an 88-key piano with eight-voice polyphony, FIFO voice stealing, recording
 
 Read this file and task_decomposition.md before each task. Implement one small task at a time. Preserve unrelated applications and working-tree changes.
 
-The piano application belongs in `Homework 2/`; these root instruction documents
-and `PROMPT_LOG.md` remain the piano's references. `Homework 1/` is the separate
+The piano application and its instruction documents/log belong in `Homework 2/`;
+read `project_rules.md`, `task_decomposition.md`, and `PROMPT_LOG.md` there.
+`Homework 1/` is the separate
 drum studio. Determine the piano package manager from its own lockfile when one
 exists; do not treat a sibling application's lockfile as piano configuration.
 

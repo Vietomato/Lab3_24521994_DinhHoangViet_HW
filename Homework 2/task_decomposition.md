@@ -4,7 +4,7 @@
 
 Create a React 19 piano spanning A0–C8 with eight-voice polyphony, FIFO voice stealing, isolated key rendering, FIFO recording, and abortable variable-speed replay. Use locally synthesized Web Audio sound; no external API or backend is required.
 
-Read project_rules.md before every task. All tasks below are planned and unchecked. Adapt paths to the existing project without changing unrelated applications. The proposed 14 commits provide more than the minimum 10 meaningful commits; do not manufacture commits for already completed work.
+Read project_rules.md before every task. Checkboxes record only verified work; unchecked items remain planned. Paths are relative to `Homework 2/`. Preserve unrelated applications. The proposed 14 commits provide more than the minimum 10 meaningful commits; do not manufacture commits for already completed work.
 
 ## Suggested structure
 
@@ -46,6 +46,79 @@ README.md
 | Stop | AbortController plus run ID; cancel pending work; release voices with short click-free envelope |
 | Render proof | Profile real update renders; distinguish normal single-note activity from FIFO stealing |
 
+## Defined JSDoc contracts and ownership
+
+The contract-only module [src/types.js](src/types.js) defines `PianoNote`,
+`PianoKeyProps`, `VoiceHandle`, `RecordedNote`, `PianoAudioEngine`,
+`PianoRecorder`, `PianoSequencer`, and `PianoTransport`, with their callbacks.
+It contains typedefs and an empty module export only, not feature implementations.
+
+- Generated note metadata is readonly; freeze it when generation is implemented.
+- Native-key callbacks take MIDI plus an input owner ID and remain stable for
+  React.memo. Input hooks retain the generation handle for each owner.
+- One active allocation exists per distinct MIDI pitch, shared by current owners.
+  Duplicate held owners do not allocate again. Releasing one owner leaves other
+  owners sounding. FIFO stealing removes all owners of the oldest allocation;
+  stolen held owners stay silent until released/repressed.
+- Audio note-on returns a generation-specific handle asynchronously and accepts
+  an optional AbortSignal for pending initialization. Early input release cancels
+  pending work; stale note-off cannot release a replacement generation.
+- Voice-end notifications finalize stolen recording events at logical removal,
+  not at the later end of the approximately 40ms audio release tail.
+- Recorder note-on reserves an onset-order slot and recording ID; note-off
+  finalizes that slot. Published events are complete immutable snapshots.
+- Transport owns `idle`, `recording`, and `playing`; a run owns its controller,
+  run ID, timers, abort listeners, and voice handles. Stop cleans up only that
+  run, with idempotent methods and handled abort outcomes.
+
+## Recording and replay timing
+
+All measured times use the same monotonic `performance.now()` domain.
+For onset `t[i]`, recording start `r`, and note-off `u[i]`:
+
+```text
+deltaMs[0] = t[0] - r
+deltaMs[i] = t[i] - t[i - 1]  (i > 0)
+durationMs[i] = u[i] - t[i]
+```
+
+Do not replace onset gaps with silence-after-release gaps. Keep FIFO onset order
+even if later notes finish first. Equal onsets have zero gap and preserve their
+insertion order. Stop Recording finalizes held events at the stop timestamp,
+releases live owners, and then publishes the sequence. Reject invalid MIDI,
+inconsistent/nonfinite frequency, nonfinite/negative times, and unsupported speed.
+
+Snapshot the saved sequence and selected speed `s` before starting replay.
+With replay start `p`, compute each target from cumulative original gaps:
+
+```text
+onsetTarget[i] = p + sum(deltaMs[0..i]) / s
+releaseTarget[i] = onsetTarget[i] + durationMs[i] / s
+```
+
+Schedule releases independently; never await one duration before scheduling the
+next onset. Generation-specific handles prevent an old release from stopping a
+retriggered pitch. Targets use the shared start clock to avoid chained-delay
+drift. Both onsets and durations scale at 0.5x/1x/2x. Speed changes affect the next
+run. More than eight simultaneous distinct pitches still obey FIFO voice stealing.
+
+Worked example (milliseconds relative to record/replay start):
+
+| Event | MIDI | Onset | Note-off | deltaMs | durationMs | 2x onset / note-off |
+| --- | --- | --- | --- | --- | --- | --- |
+| A | 60 | 100 | 400 | 100 | 300 | 50 / 200 |
+| B | 64 | 150 | 200 | 50 | 50 | 75 / 100 |
+| C | 67 | 150 | 350 | 0 | 200 | 75 / 175 |
+
+Saved order is A, B, C; release order is B, C, A. At 0.5x, the respective onset /
+note-off pairs are 200/800, 300/400, and 300/700. B and C remain concurrent
+with A at every supported speed. Replay completes only after all logical
+note-offs and owned release tails finish. An already-aborted signal allocates
+nothing; stop cancels onset waits and release schedules, releases run-owned voices,
+and resolves an expected aborted outcome without an unhandled rejection.
+No old run may reset transport state or stop a newer run. Empty replay completes
+without allocation; conflicts between recording and playback are rejected.
+
 ## Task 01 — Repository rules and hygiene
 
 - [ ] Implement and verify this task.
@@ -62,7 +135,7 @@ README.md
 
 ## Task 02 — Task plan and contracts
 
-- [ ] Implement and verify this task.
+- [x] Define and review the contract-only module and timing documentation (2026-11-12).
 
 **Scope:** Adopt this plan. Define JSDoc for PianoNote, PianoKeyProps, VoiceHandle, RecordedNote, and transport/replay. Explicitly document deltaMs, durationMs, FIFO ordering, speed scaling, and generation-safe release.
 
@@ -71,6 +144,9 @@ README.md
 **Acceptance:** Contracts are defined before feature code and agree with project_rules.md.
 
 **Verification:** Review note range, voice policy, recording semantics, and stop behavior.
+
+Evidence: `src/types.js` syntax/contract-content checks and worked-example timing
+assertions passed. No audio/recorder/replay behavior exists or was tested yet.
 
 **Suggested commit:** `docs: define piano tasks and timing contracts`
 
