@@ -21,11 +21,34 @@
 /** @typedef {DrumPad} DrumPadConfig */
 
 /**
- * Presentational subset of the planned component contract.
- * Activation/release callbacks will be added with interaction integration.
  * @typedef {Object} DrumPadProps
  * @property {DrumPad} pad
  * @property {boolean} isActive Parent-controlled momentary state, not a toggle.
+ * @property {ActivatePad} onActivate
+ * @property {ReleasePad} onRelease
+ */
+
+/** @typedef {'pointer'|'keyboard'|'native'} InputSource */
+/**
+ * @callback ActivatePad
+ * @param {DrumPad} pad
+ * @param {InputSource} source
+ * @param {string} inputId
+ * @returns {void}
+ */
+/**
+ * @callback ReleasePad
+ * @param {string} padId
+ * @param {InputSource} source
+ * @param {string} inputId
+ * @returns {void}
+ */
+/**
+ * @typedef {Object} DrumKeyboardOptions
+ * @property {ReadonlyMap<PadCode, DrumPad>} padMap
+ * @property {boolean} isEnabled
+ * @property {ActivatePad} onActivate
+ * @property {ReleasePad} onRelease
  */
 
 export {};
