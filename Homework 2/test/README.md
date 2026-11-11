@@ -40,3 +40,9 @@ Physical touch/pen, actual tab switching, audible chord/release quality, screen
 readers, other browser engines, and React DevTools render profiling remain manual.
 The visibility test dispatches visibilitychange with a hidden document property;
 it is not evidence of operating-system tab behavior.
+
+Render isolation also has repeatable browser tests in `renderIsolation.spec.js`.
+They count actual key-function executions via CDP, separately with and without
+StrictMode, and collect root React Profiler callback data. See
+[render-results.md](render-results.md) for measured counts and limitations. This
+is not a capture from the React DevTools Profiler extension UI.

@@ -286,7 +286,8 @@ remain NOT VERIFIED. See `test/README.md` for repeatable commands.
 
 ## Task 09 — Memoized key isolation
 
-- [ ] Implement and verify this task.
+- [x] Verify memo boundaries and measured browser execution isolation (2026-11-12).
+- [ ] Capture React DevTools Profiler UI evidence — NOT VERIFIED; UI unavailable in this session.
 
 **Scope:** Wrap PianoKey in React.memo; stabilize callbacks and primitive props. Remove unnecessary object/collection props or changing inline handlers at the parent boundary.
 
@@ -295,6 +296,14 @@ remain NOT VERIFIED. See `test/README.md` for repeatable commands.
 **Acceptance:** An ordinary single-note update affects that key only; other key component bodies do not rerender.
 
 **Verification:** Record actual React DevTools Profiler update evidence after initial mount. Report unavailable profiling as NOT VERIFIED; separately inspect stealing transitions.
+
+Evidence: retained memo's default shallow comparison, primitive per-key props and
+stable callbacks. Cached layout style objects and preserved pressed-state identity
+when active MIDI values are unchanged. CDP precise execution counts measured one
+key body for press/release and two for FIFO stealing without StrictMode; StrictMode
+doubled those calls. Mounting was measured separately (88/176). Root React Profiler
+callbacks were recorded by the test fixture; they are not a DevTools UI capture.
+All 16 unit/12 browser tests and build passed. See `test/render-results.md`.
 
 **Suggested commit:** `perf: isolate piano key updates with React memo`
 

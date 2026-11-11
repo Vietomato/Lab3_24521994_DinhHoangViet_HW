@@ -487,3 +487,81 @@ Verify chords, pointer movement outside keys, cancellation, native keyboard acti
 Connected piano keys to live audio with independent input ownership, sustained Enter/Space, pointer capture/cancellation, and stolen-voice visual updates.
 
 All 16 unit tests, 10 browser tests, and the production build passed. Updated the task plan and prompt log. Physical-device, real tab-switching, and listening checks remain manual. No commit made.
+
+## 2026-11-12 — PianoKey memoization and measured update isolation
+
+### Exact optimization prompt received
+
+```text
+Optimize PianoKey rendering with React.memo.\
+\
+Requirements:\
+- Pass primitive note metadata and each key's own isPressed boolean.\
+- Keep onNoteOn and onNoteOff callback references stable.\
+- Do not pass the entire pressed-note collection to every key.\
+- Avoid changing object props or inline parent callbacks that defeat memoization.\
+- Do not use an unsafe custom comparator to hide stale callbacks.\
+\
+Verify update renders with React DevTools Profiler if available:\
+- A normal single-note press should update only the affected key component.\
+- Releasing it should update that key.\
+- Voice stealing may legitimately update both the stolen key and the new key.\
+\
+Distinguish initial mounting and StrictMode behavior from update renders. Do not invent Profiler results if profiling is unavailable.
+```
+
+### Exact follow-up prompt received
+
+```text
+tôi ms lỡ commit, bạn revert và tiếp tục làm
+```
+
+### Inspection and changes
+
+- Read project_rules.md, Task 09, components, hooks, and the clean working tree before optimization.
+- Existing PianoKey already used memo/default shallow comparison and primitive props. Existing callbacks were stable through useCallback; no collection or new parent callback was passed to each key. Baseline CDP checks observed 176 mount calls and two calls each for press/release under StrictMode. No fabricated memoization defect.
+- Preserved the correct memo boundary and added explanatory comments. Cached wrapper grid-style objects at module scope (these wrapper styles were not key props and did not previously defeat memo). usePianoInput now returns the previous pressed Set for unchanged MIDI membership.
+- Added test/render-isolation.html with real root React Profiler callback collection and StrictMode toggle, and test/renderIsolation.spec.js with precise browser JavaScript function-call measurements and controlled DOM assertions.
+- Added test/render-results.md, updated test/README.md and Task 09 with evidence and the pending DevTools UI check. No custom comparator or render counter added to production components.
+
+### Actual checks
+
+- PASS: 16 Node tests; 12 browser tests, including StrictMode on/off isolation variants (11.4s browser run); production build (22 modules, 116ms); git diff --check (LF-to-CRLF warnings only).
+- Actual measured function-body counts without StrictMode: mount 88; press 1; release 1; second owner on same pitch 0; eight-note chord 8; FIFO ninth-note old/new transition 2; chord release 8. With StrictMode: 176, 2, 2, 0, 16, 4, 16 respectively.
+- Initial browser-test assertion expected zero root Profiler commits for adding a second owner; observed one root commit while key-body calls remained zero. Removed this unrelated root-level assertion. Final isolation tests passed. Do not equate a root commit with all child bodies rendering.
+- React DevTools Profiler extension UI: NOT VERIFIED/unavailable in this session. CDP execution counts and real root React Profiler callbacks are separate evidence, not a fabricated DevTools profile or screenshot. Manual steps are documented.
+
+### User commit and revert request
+
+- Work was interrupted before documentation was finished. On resumption, observed user-created commit 14fb87c (perf: isolate piano key updates with React memo), already on origin/Homework-2, containing the three source changes and two browser fixture/test files. Working tree was clean.
+- User explicitly authorized revert and continuation. Attempted git revert --no-edit 14fb87c; it failed immediately because this session cannot write .git/index.lock. No revert completed; no elevated/background revert was started, preventing another delayed Git operation.
+- Continued the unaffected documentation/log work. No code change after the successful verification run; the user's optimization commit still contains that verified code. No commit, push, reset, or history rewrite performed by the assistant in this task.
+- To preserve published history and continue reviewing the optimization as uncommitted files, the user can revert 14fb87c in their IDE terminal and restore its five specific files to the working tree only. Documentation edits made now are outside that commit and should be preserved.
+
+### Assistant response
+
+Tôi đã hoàn tất tài liệu và prompt log. Kiểm tra render cho thấy chỉ một phím chạy lại khi nhấn/thả, và hai phím khi FIFO stealing; StrictMode nhân đôi số lần gọi. Cả 16 unit test, 12 browser test và build đều qua. DevTools Profiler UI chưa được xác minh.
+
+Tôi chưa revert được vì bị chặn quyền ghi .git. Commit 14fb87c vẫn còn nguyên; cần chạy revert trong terminal IDE rồi khôi phục năm file tối ưu thành thay đổi chưa commit để tiếp tục review.
+
+## 2026-11-12 — Confirm revert and resume optimization review
+
+### Exact prompt received
+
+```text
+revert r á
+```
+
+### Work and verification
+
+- Confirmed user-created revert commit 2a6e1dc at HEAD. The optimization's five files were reverted; earlier documentation changes remained unstaged.
+- Continued the previously authorized optimization task: read the five exact versions from 14fb87c with git show and restored their contents to the working tree only. Verified no existing unstaged changes on those paths before writing; preserved documentation edits. No index write, commit, revert, push, reset, or history rewrite performed.
+- Restored PianoKey memo comments, stable keyboard layout styles, pressed-set identity preservation, and the two render-isolation fixture/test files as uncommitted changes.
+- PASS: 16 unit tests, 12 browser tests (15.1s), production build (22 modules, 167ms), and git diff --check (LF-to-CRLF warnings only).
+- Browser measurements again passed StrictMode on/off: one key for a normal press/release, two for a FIFO stolen/new transition; StrictMode doubles body calls. React DevTools Profiler UI remains NOT VERIFIED; these are CDP execution counts plus root React Profiler callback data.
+
+### Assistant response
+
+Đã xác nhận revert xong ở commit `2a6e1dc`. Tôi đã khôi phục phần tối ưu dưới dạng **chưa commit** để tiếp tục review và cập nhật prompt log.
+
+Kiểm tra lại: **16 unit test, 12 browser test và build đều qua**. Không tạo commit hay push.

@@ -7,7 +7,13 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
   const [pressedMidi, setPressedMidi] = useState(() => new Set());
 
   const synchronize = useCallback(() => {
-    if (mounted.current) setPressedMidi(new Set(getActiveVoices().map(voice => voice.midi)));
+    if (!mounted.current) return;
+    const next = new Set(getActiveVoices().map(voice => voice.midi));
+    setPressedMidi(previous => {
+      // Preserve state identity when owners change but active pitches do not.
+      if (previous.size === next.size && [...next].every(midi => previous.has(midi))) return previous;
+      return next;
+    });
   }, [getActiveVoices]);
 
   const onNoteOff = useCallback((midi, ownerId) => {
