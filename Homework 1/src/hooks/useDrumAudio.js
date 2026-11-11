@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { DrumAudioEngine } from '../audio/DrumAudioEngine.js';
 
 /** Owns one engine per effect setup; exposes errors for future inline UI. */
 export function useDrumAudio() {
   const engineRef = useRef(null);
   const [error, setError] = useState(null);
+  const [volume, setVolumeState] = useState(0.7);
+  const configureEngine = useEffectEvent((engine) => engine.setVolume(volume));
 
   useEffect(() => {
     // StrictMode cleanup disposes this instance; the next setup gets a fresh one.
     const engine = new DrumAudioEngine();
+    configureEngine(engine);
     engineRef.current = engine;
     return () => {
       engineRef.current = null;
@@ -29,7 +32,13 @@ export function useDrumAudio() {
     }
   }, []);
 
-  const setVolume = useCallback((level) => engineRef.current?.setVolume(level), []);
+  const setVolume = useCallback((level) => {
+    if (!Number.isFinite(level) || level < 0 || level > 1) {
+      throw new RangeError('Volume must be between 0 and 1.');
+    }
+    engineRef.current?.setVolume(level);
+    setVolumeState(level);
+  }, []);
   const getAnalyser = useCallback(() => engineRef.current?.getAnalyser() ?? null, []);
-  return { trigger, setVolume, getAnalyser, error };
+  return { trigger, volume, setVolume, getAnalyser, error };
 }

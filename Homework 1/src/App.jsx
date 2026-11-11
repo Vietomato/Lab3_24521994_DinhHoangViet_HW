@@ -1,4 +1,6 @@
 import DrumPad from './components/DrumPad.jsx';
+import { useState } from 'react';
+import DrumControls from './components/DrumControls.jsx';
 import { drumPads } from './config/drumPads.js';
 import { useDrumAudio } from './hooks/useDrumAudio.js';
 import { useDrumActivation } from './hooks/useDrumActivation.js';
@@ -8,9 +10,10 @@ const padMap = new Map(drumPads.map((pad) => [pad.code, pad]));
 
 /** Drum interface with shared audio activation and independently held inputs. */
 export default function App() {
-  const { trigger, error } = useDrumAudio();
+  const { trigger, error, volume, setVolume } = useDrumAudio();
+  const [shortcutsEnabled, setShortcutsEnabled] = useState(true);
   const { activePadIds, onActivate, onRelease } = useDrumActivation(trigger);
-  useDrumKeyboard({ padMap, isEnabled: true, onActivate, onRelease });
+  useDrumKeyboard({ padMap, isEnabled: shortcutsEnabled, onActivate, onRelease });
   return (
     <>
       <a className="skip-link" href="#main-content">Skip to main content</a>
@@ -19,6 +22,8 @@ export default function App() {
         <p>A space for rhythm.</p>
       </header>
       <main id="main-content" tabIndex={-1}>
+        <DrumControls volume={volume} onVolumeChange={setVolume}
+          shortcutsEnabled={shortcutsEnabled} onShortcutsChange={setShortcutsEnabled} />
         <section aria-labelledby="studio-heading">
           <h2 id="studio-heading">Drum pads</h2>
           <p id="pad-instructions">
