@@ -34,8 +34,8 @@ Use JSDoc; TypeScript migration is not required.
 The following contracts are documentation, not application implementation.
 When implementation starts, place the shared typedefs in `src/types.js` and
 import them through JSDoc. Paths under `src/` are relative to the eventual
-application root. This plan and its authoritative rules stay in `Homework 1/`;
-`PROMPT_LOG.md` stays at the repository root.
+application root, now `Homework 1/`. Application files, this plan, the
+authoritative rules, and `prompt_log.md` all live in `Homework 1/`.
 
 ```javascript
 /** @typedef {'KeyW'|'KeyA'|'KeyS'|'KeyD'|'KeyJ'|'KeyK'|'KeyL'} PadCode */
@@ -179,7 +179,7 @@ Commit: `docs: define drum studio project rules`
 - [ ] Adopt this task plan and define the JSDoc contracts above in an appropriate documentation or source location.
 - [ ] Specify scope, input behavior, acceptance criteria, and verification before implementation.
 
-Files: `Homework 1/task_decomposition.md` (including documented contracts),
+Files: `task_decomposition.md` (including documented contracts),
 `PROMPT_LOG.md`; later implementation may move typedefs to `src/types.js`.
 
 Acceptance: each feature has a clear contract and independently reviewable task.
