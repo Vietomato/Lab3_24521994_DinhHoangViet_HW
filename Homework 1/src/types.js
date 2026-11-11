@@ -20,4 +20,12 @@
  */
 /** @typedef {DrumPad} DrumPadConfig */
 
+/**
+ * Presentational subset of the planned component contract.
+ * Activation/release callbacks will be added with interaction integration.
+ * @typedef {Object} DrumPadProps
+ * @property {DrumPad} pad
+ * @property {boolean} isActive Parent-controlled momentary state, not a toggle.
+ */
+
 export {};
