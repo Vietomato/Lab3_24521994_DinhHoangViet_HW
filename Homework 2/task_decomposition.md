@@ -152,7 +152,7 @@ assertions passed. No audio/recorder/replay behavior exists or was tested yet.
 
 ## Task 03 — Application shell
 
-- [x] Implement and verify this task (2026-11-12).
+- [ ] Implement and verify this task.
 
 **Scope:** Reuse or prepare React 19 and Vite. Add semantic page regions and folders for components, audio, hooks, music data, and sequencing.
 
@@ -161,12 +161,6 @@ assertions passed. No audio/recorder/replay behavior exists or was tested yet.
 **Acceptance:** Development server and production build work without an unnecessary nested application.
 
 **Verification:** Run build and open the actual development page.
-
-Evidence: React/React DOM 19.3.1 and Vite 8.3.8 installed with npm in this
-application folder; production build passed. Dev server started on port 5175.
-Real Edge checks passed for header/main semantics, 375px overflow, skip-link
-focus/navigation, and absence of browser console/page/HTTP errors. Existing
-`src/types.js` contracts were preserved. No piano features implemented yet.
 
 **Suggested commit:** `chore: set up polyphonic piano application`
 
