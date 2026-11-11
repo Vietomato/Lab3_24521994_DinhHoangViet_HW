@@ -80,7 +80,7 @@ test('lazy audio, A4 oscillator, ADS envelope, conservative master, 40ms release
   assert.ok(master.disconnected);
 });
 
-test('shared/duplicate owners, stale releases, and single-voice scope', async () => {
+test('shared/duplicate owners and generation-safe stale releases', async () => {
   mockAudio();
   const synth = new PolyphonicSynth();
   const first = await synth.noteOn(60, 'a');
@@ -88,12 +88,14 @@ test('shared/duplicate owners, stale releases, and single-voice scope', async ()
   assert.equal(await synth.noteOn(60, 'b'), first);
   synth.noteOff(first, 'a');
   assert.equal(first.isReleasing, false);
-  await assert.rejects(synth.noteOn(62, 'c'), /voice pool/);
+  const other = await synth.noteOn(62, 'c');
+  assert.equal(synth.getActiveVoices().length, 2);
   synth.noteOff(first, 'b');
   const second = await synth.noteOn(60, 'a');
   assert.notEqual(first.id, second.id);
   synth.noteOff(first, 'a');
   assert.equal(second.isReleasing, false);
+  assert.equal(other.isReleasing, false);
   await synth.dispose();
   await assert.rejects(synth.noteOn(60, 'a'), /disposed/);
 });
@@ -145,4 +147,108 @@ test('release cleanup stays bounded if ended never arrives (suspended audio cloc
   await synth.dispose();
   assert.equal(voice.isReleased, true);
   assert.ok(voice.oscillator.disconnected && voice.gain.disconnected);
+});
+
+test('eight allocations, ninth/tenth FIFO stealing, and tails outside active allocation', async () => {
+  const contexts = mockAudio({ emitEnded: false });
+  const synth = new PolyphonicSynth();
+  const ended = [];
+  synth.subscribeVoiceEnd(event => ended.push({ event, active: synth.getActiveVoices().length,
+    sources: contexts[0].nodes.filter(node => node.source).length }));
+  const voices = [];
+  for (let midi = 60; midi < 68; midi++) voices.push(await synth.noteOn(midi, `owner:${midi}`));
+  assert.deepEqual(synth.getActiveVoices().map(voice => voice.midi), [60,61,62,63,64,65,66,67]);
+  assert.equal(ended.length, 0);
+  assert.equal(await synth.noteOn(60, 'owner:60'), voices[0]); // Does not refresh FIFO order.
+  const ninth = await synth.noteOn(68, 'owner:68');
+  assert.deepEqual(synth.getActiveVoices().map(voice => voice.midi), [61,62,63,64,65,66,67,68]);
+  assert.equal(ended[0].event.voice, voices[0]);
+  assert.equal(ended[0].event.reason, 'stolen');
+  assert.equal(ended[0].active, 7); // Removed before replacement starts.
+  assert.equal(ended[0].sources, 8);
+  assert.deepEqual(ended[0].event.ownerIds, ['owner:60']);
+  assert.ok(Number.isFinite(ended[0].event.endedAtMs));
+  assert.ok(voices[0].isReleasing && !voices[0].isReleased);
+  assert.equal(contexts[0].nodes.filter(node => node.source && !node.disconnected).length, 9);
+  const tenth = await synth.noteOn(69, 'owner:69');
+  assert.equal(ended[1].event.voice, voices[1]);
+  assert.equal(synth.getActiveVoices().length, 8);
+  assert.ok(ninth.startOrder < tenth.startOrder);
+  await synth.dispose();
+  assert.ok([...voices, ninth, tenth].every(voice => voice.isReleased && voice.ownerIds.size === 0));
+  assert.ok(contexts[0].nodes.every(node => node.disconnected));
+  assert.equal(synth.getActiveVoices().length, 0);
+});
+
+test('concurrent duplicate owners do not allocate or refresh order, including cross-pitch duplicates', async () => {
+  const contexts = mockAudio();
+  const synth = new PolyphonicSynth();
+  const [first, duplicate] = await Promise.all([synth.noteOn(60, 'pointer:1'), synth.noteOn(60, 'pointer:1')]);
+  assert.equal(first, duplicate);
+  assert.equal(await synth.noteOn(62, 'pointer:1'), first);
+  assert.equal(await synth.noteOn(60, 'keyboard:a'), first);
+  assert.equal(synth.getActiveVoices().length, 1);
+  assert.equal(contexts[0].nodes.filter(node => node.source).length, 1);
+  synth.noteOff(first, 'pointer:1');
+  assert.equal(first.isReleasing, false);
+  synth.noteOff(first, 'keyboard:a');
+  assert.equal(first.isReleasing, true);
+  await synth.dispose();
+});
+
+test('stolen held owner remains silent; retrigger and old-generation noteOff stay independent', async () => {
+  mockAudio({ emitEnded: false });
+  const synth = new PolyphonicSynth();
+  const old = await synth.noteOn(60, 'held');
+  for (let midi = 61; midi <= 68; midi++) await synth.noteOn(midi, `owner:${midi}`);
+  assert.equal(await synth.noteOn(60, 'held'), null);
+  const replacement = await synth.noteOn(60, 'fresh-owner');
+  assert.notEqual(old.id, replacement.id);
+  synth.noteOff(old, 'held');
+  assert.equal(await synth.noteOn(60, 'held'), replacement);
+  synth.noteOff(old, 'held'); // Same owner ID now belongs to replacement.
+  assert.ok(replacement.ownerIds.has('held'));
+  assert.equal(replacement.isReleasing, false);
+  old.oscillator.onended(); // Late old ended callback cannot remove replacement.
+  assert.equal(synth.getActiveVoices().find(voice => voice.midi === 60), replacement);
+  await synth.dispose();
+});
+
+test('end notifications occur once; unsubscribe and unexpected source endings are safe', async () => {
+  mockAudio();
+  const synth = new PolyphonicSynth();
+  const events = [];
+  const unsubscribe = synth.subscribeVoiceEnd(event => events.push(event));
+  const first = await synth.noteOn(60, 'a');
+  synth.noteOff(first, 'a');
+  await synth.stopAll();
+  assert.equal(events.length, 1);
+  assert.equal(events[0].reason, 'released');
+  const second = await synth.noteOn(62, 'b');
+  second.oscillator.onended();
+  assert.equal(events.length, 2);
+  assert.equal(events[1].voice, second);
+  assert.equal(synth.getActiveVoices().length, 0);
+  assert.equal(await synth.noteOn(62, 'b'), null);
+  synth.noteOff(second, 'b');
+  unsubscribe(); unsubscribe();
+  await synth.noteOn(64, 'c');
+  await synth.dispose();
+  assert.equal(events.length, 2);
+});
+
+test('disposal reports every active voice once and blocks allocation from reentrant callbacks', async () => {
+  mockAudio();
+  const synth = new PolyphonicSynth();
+  for (let midi = 60; midi < 68; midi++) await synth.noteOn(midi, `owner:${midi}`);
+  const reasons = [];
+  synth.subscribeVoiceEnd(event => {
+    reasons.push(event.reason);
+    if (event.reason === 'stolen') void synth.dispose();
+  });
+  assert.equal(await synth.noteOn(68, 'new'), null);
+  await synth.dispose();
+  assert.equal(reasons.filter(reason => reason === 'stolen').length, 1);
+  assert.equal(reasons.filter(reason => reason === 'disposed').length, 7);
+  assert.equal(synth.getActiveVoices().length, 0);
 });

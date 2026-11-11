@@ -238,7 +238,7 @@ silent; eight-voice FIFO allocation and full live input are still later tasks.
 
 ## Task 07 — Eight-voice FIFO pool
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify this task (2026-11-12).
 
 **Scope:** Add Map-based active allocation and generation-specific voice handles. At capacity release the oldest before starting the ninth distinct note. Handle duplicates, stale note-off, stolen held notes, and bounded release tails.
 
@@ -247,6 +247,16 @@ silent; eight-voice FIFO allocation and full live input are still later tasks.
 **Acceptance:** At most eight allocated active voices; deterministic oldest-first stealing; stale release cannot stop a replacement.
 
 **Verification:** Test eight notes, ninth/tenth stealing, duplicate note-on, retriggered pitch, delayed release, and disposal.
+
+Evidence: active allocations now use Map insertion order, capped at eight distinct
+pitches, with separate resources for release tails and owner tracking for stolen
+held inputs. Generation-safe handles, FIFO snapshots, and subscribeVoiceEnd
+notifications are implemented. All 16 tests passed, including ninth/tenth stealing,
+concurrent duplicates, shared owners, retrigger/stale release, late ended callbacks,
+notifications, unsubscribe, reentrant disposal and full cleanup. Real Edge verified
+eight simultaneous native voices/nonzero signal, ninth stealing, replacement
+ownership and disposal without browser errors. Production build passed. Live-key
+integration and audible quality remain for subsequent/manual checks.
 
 **Suggested commit:** `feat: add eight-voice FIFO voice stealing`
 

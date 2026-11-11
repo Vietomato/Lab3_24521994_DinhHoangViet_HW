@@ -67,6 +67,7 @@
  * @property {VoiceHandle} voice
  * @property {'released'|'stolen'|'disposed'} reason
  * @property {number} endedAtMs Monotonic performance.now() domain.
+ * @property {ReadonlyArray<string>} ownerIds Owner snapshot at logical end, for UI/recorder cleanup.
  */
 
 /**
@@ -130,6 +131,7 @@
  * @property {StopAllVoices} stopAll
  * @property {DisposeAudio} dispose
  * @property {SubscribeVoiceEnd} subscribeVoiceEnd
+ * @property {function(): ReadonlyArray<VoiceHandle>} getActiveVoices FIFO snapshot; excludes release tails.
  */
 
 /**

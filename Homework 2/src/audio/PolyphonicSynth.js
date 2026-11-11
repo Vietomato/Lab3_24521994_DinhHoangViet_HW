@@ -5,13 +5,17 @@ const PEAK = 0.18;
 const SUSTAIN = 0.1;
 const RELEASE = 0.04;
 const HEADROOM = 0.3;
+const MAX_VOICES = 8;
 
-/** Single-voice foundation. Eight-voice allocation belongs to the next task. */
+/** Eight distinct active pitches, allocated in Map insertion (FIFO) order. */
 export class PolyphonicSynth {
   #context = null;
   #master = null;
   #resume = null;
-  #active = null;
+  #active = new Map();
+  #owners = new Map();
+  #listeners = new Set();
+  // Resources include both active allocations and short releasing tails.
   #resources = new Map();
   #volume = 0.7;
   #order = 0;
@@ -71,11 +75,18 @@ export class PolyphonicSynth {
     await this.initialize();
     if (signal?.aborted || generation !== this.#generation) return null;
     this.#assertUsable();
-    if (this.#active) {
-      if (this.#active.midi !== midi) throw new Error('Release the current note first; the voice pool is not implemented yet.');
-      this.#active.ownerIds.add(ownerId);
-      return this.#active;
+    const owned = this.#owners.get(ownerId);
+    if (owned) return owned.isReleasing || owned.isReleased ? null : owned;
+    const existing = this.#active.get(midi);
+    if (existing) {
+      existing.ownerIds.add(ownerId);
+      this.#owners.set(ownerId, existing);
+      return existing;
     }
+    if (this.#active.size >= MAX_VOICES) this.#release(this.#active.values().next().value, 'stolen');
+    // Subscribers can stop/dispose from the logical-end notification.
+    if (generation !== this.#generation) return null;
+    this.#assertUsable();
     const context = this.#context;
     const nodes = [];
     let oscillator;
@@ -100,19 +111,19 @@ export class PolyphonicSynth {
       const done = new Promise(resolve => { resolveDone = resolve; });
       const resource = { done, timer: null, finish: () => {
         if (voice.isReleased) return;
+        if (!voice.isReleasing) this.#removeAllocation(voice, 'released');
         voice.isReleased = true;
-        voice.ownerIds.clear();
         clearTimeout(resource.timer);
         oscillator.onended = null;
         for (const node of nodes) node.disconnect();
         this.#resources.delete(voice);
-        if (this.#active === voice) this.#active = null;
         resolveDone();
       } };
       oscillator.onended = resource.finish;
       oscillator.start(startedAt);
       this.#resources.set(voice, resource);
-      this.#active = voice;
+      this.#active.set(midi, voice);
+      this.#owners.set(ownerId, voice);
       return voice;
     } catch (cause) {
       if (oscillator) oscillator.onended = null;
@@ -123,8 +134,26 @@ export class PolyphonicSynth {
 
   /** @param {import('../types.js').VoiceHandle} voice @param {string} ownerId */
   noteOff(voice, ownerId) {
-    if (this.#active !== voice || !voice.ownerIds.delete(ownerId)) return;
-    if (!voice.ownerIds.size) this.#release(voice);
+    // Identity protects a new generation even when owner ID and MIDI are reused.
+    if (this.#owners.get(ownerId) !== voice) return;
+    this.#owners.delete(ownerId);
+    voice.ownerIds.delete(ownerId);
+    if (this.#active.get(voice.midi) === voice && !voice.ownerIds.size) this.#release(voice, 'released');
+  }
+
+  /** @returns {ReadonlyArray<import('../types.js').VoiceHandle>} FIFO snapshot. */
+  getActiveVoices() { return Object.freeze([...this.#active.values()]); }
+
+  /**
+   * Notify at logical release/steal/end, not again when its audio tail ends.
+   * @param {function(import('../types.js').VoiceEndEvent): void} listener
+   * @returns {function(): void}
+   */
+  subscribeVoiceEnd(listener) {
+    this.#assertUsable();
+    if (typeof listener !== 'function') throw new TypeError('A voice-end listener must be a function.');
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
   }
 
   /** @param {number} level Normalized [0, 1]; can be set before initialization. */
@@ -137,8 +166,15 @@ export class PolyphonicSynth {
 
   /** @returns {Promise<void>} Includes release tails; safe when repeated. */
   stopAll() {
+    return this.#stopAll('released');
+  }
+
+  #stopAll(reason) {
     this.#generation++;
-    if (this.#active) this.#release(this.#active);
+    for (const voice of [...this.#active.values()]) this.#release(voice, reason);
+    for (const voice of this.#owners.values()) voice.ownerIds.clear();
+    this.#owners.clear();
+    for (const voice of this.#resources.keys()) voice.ownerIds.clear();
     return Promise.all([...this.#resources.values()].map(resource => resource.done)).then(() => {});
   }
 
@@ -147,7 +183,8 @@ export class PolyphonicSynth {
     if (this.#disposal) return this.#disposal;
     this.#disposed = true;
     this.#disposal = (async () => {
-      await this.stopAll();
+      await this.#stopAll('disposed');
+      this.#listeners.clear();
       this.#master?.disconnect();
       const context = this.#context;
       this.#context = this.#master = null;
@@ -160,12 +197,19 @@ export class PolyphonicSynth {
     if (this.#disposed) throw new Error('This audio instance is disposed; create a fresh instance.');
   }
 
-  #release(voice) {
+  #removeAllocation(voice, reason) {
+    if (this.#active.get(voice.midi) === voice) this.#active.delete(voice.midi);
+    voice.isReleasing = true;
+    const event = Object.freeze({ voice, reason, endedAtMs: performance.now(), ownerIds: Object.freeze([...voice.ownerIds]) });
+    for (const listener of [...this.#listeners]) {
+      try { listener(event); } catch (cause) { console.error('Voice-end listener failed:', cause); }
+    }
+  }
+
+  #release(voice, reason) {
     const resource = this.#resources.get(voice);
     if (!resource || voice.isReleasing) return;
-    voice.isReleasing = true;
-    voice.ownerIds.clear();
-    this.#active = null;
+    this.#removeAllocation(voice, reason);
     const now = this.#context.currentTime;
     // Every scheduled envelope value is positive, including the held value.
     voice.gain.gain.cancelAndHoldAtTime(now);

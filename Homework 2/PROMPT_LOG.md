@@ -393,3 +393,50 @@ Keep audio behavior separate from React rendering.
 Git đã hết xung đột và shell được giữ nguyên. Tôi đã hoàn thành audio foundation: ADSR, release 40 ms, cleanup, StrictMode và lỗi inline.
 
 Cả 11 test, kiểm tra Web Audio trong Edge và production build đều qua. Đã cập nhật task plan và prompt log. Phím đàn chưa nối âm thanh; phần tám voice/FIFO ở bước sau. Chưa commit.
+
+## 2026-11-12 — Eight-voice FIFO audio pool
+
+### Exact prompt received
+
+```text
+Extend the audio engine with an eight-voice pool.\
+\
+Requirements:\
+- Track allocated active voices using Map insertion order.\
+- Allow up to eight distinct active notes.\
+- On a ninth distinct note, release the oldest active voice before allocating the new one.\
+- Ignore duplicate note-on calls from the same input owner.\
+- Assign generation-specific voice handles.\
+- A delayed note-off for an old voice must not stop a replacement voice with the same MIDI pitch.\
+- Keep releasing audio tails separate from allocated active voices.\
+- Notify the interface when a voice is stolen or ends.\
+\
+Test eight-note allocation, ninth-note stealing, duplicate activation, same-pitch retriggering, stale release, and disposal.
+```
+
+### Changes
+
+- Read project_rules.md and reviewed Task 07, the engine, contracts, existing tests, and clean Git status before editing.
+- Replaced the single active voice field with a MIDI-keyed Map, capped at eight logical distinct-pitch allocations. Map insertion order chooses the oldest; a duplicate/shared pitch does not refresh FIFO order.
+- Added a separate owner-to-generation map. Duplicate held owners return the existing handle without starting another oscillator; same-pitch different owners share a handle. Stolen owners stay silent until released, even after their release tail completes.
+- Kept all generation-specific source/gain resources separate from active allocation. A ninth distinct note logically removes/releases the oldest before creating the replacement; short release tails may overlap without counting as allocated voices.
+- noteOff checks owner-to-handle identity before changing ownership. Old note-off and ended callbacks cannot stop/delete a replacement generation, including reuse of the same owner ID and MIDI.
+- Added getActiveVoices (readonly FIFO snapshot) and subscribeVoiceEnd (idempotent unsubscribe). One logical-end event identifies released/stolen/disposed voice, monotonic end time, and immutable owner snapshot. Subscriber failures are isolated; a subscriber-triggered stop/dispose cannot allow a late replacement allocation.
+- Disposal clears all active/tail ownership and listener resources; existing ADSR and bounded audio-node cleanup preserved. Updated the JSDoc contract and Task 07 evidence.
+- No live-key UI/input connection, recording, replay, or interface state implementation added in this engine-only step. Consumers can subscribe to the new notification API in the input-integration task.
+
+### Actual verification
+
+- PASS: npm.cmd test, all 16 tests. Added focused scenarios for eight allocations; ninth/tenth FIFO stealing; steal notification while seven allocations/eight old sources remain before replacement; nine temporarily connected sources but only eight allocations; concurrent duplicates; cross-pitch duplicate owner; shared-pitch ownership; stolen-held suppression; same-pitch retrigger; stale old noteOff and ended callbacks; unsubscribe; unexpected source ending; disposal notifications/reentrancy and resource cleanup.
+- Existing ADSR, release, initialization/cancellation/disposal and metadata tests also passed. Updated the old single-voice-limit assertion to verify multiple allocated pitches instead.
+- PASS: npm.cmd run build, 21 modules transformed, 159ms.
+- PASS: real Edge Web Audio check produced nonzero summed signal from eight simultaneous voices; the ninth removed MIDI 60 before replacement (notification saw seven allocations), duplicate stolen owner stayed silent, same-pitch replacement survived stale release, and all owned nodes disconnected/contexts closed after repeated disposal. No console warnings/errors or uncaught page errors. Browser closed afterward; local fixture is ignored under .npm-cache.
+- PASS: git diff --check, LF-to-CRLF warnings only; reviewed working-tree status. No lint script exists.
+- NOT VERIFIED: audible chord quality/clipping, physical devices, live UI pressed-state synchronization, recording/replay, and render profiling. The audio engine API is ready for subsequent live-input integration.
+- Updated this log and task plan. No commits, pushes, staging, or Git history changes performed.
+
+### Assistant response
+
+Implemented the eight-voice FIFO pool with generation-safe ownership, separate release tails, and voice-end/steal notifications.
+
+All 16 tests, real-browser eight-voice checks, and the production build passed. Updated the task plan and prompt log. Piano-key input remains unconnected; no commit was made.
