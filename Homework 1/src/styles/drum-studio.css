@@ -46,6 +46,9 @@ main > section + section { margin-top: 1.5rem; }
 .shortcut-control label { padding-block: 0.5rem; }
 
 .latest-hit { display: block; font-weight: 700; }
+.audio-meter { display: grid; gap: 0.5rem; }
+.audio-meter meter { width: 100%; height: 1.5rem; }
+.audio-meter > span { font-variant-numeric: tabular-nums; }
 .clear-history {
   min-height: 2.75rem;
   padding: 0.5rem 1rem;
