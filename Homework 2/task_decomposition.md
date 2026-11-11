@@ -309,7 +309,7 @@ All 16 unit/12 browser tests and build passed. See `test/render-results.md`.
 
 ## Task 10 — FIFO recording
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify FIFO recording (2026-11-12; stage commit pending).
 
 **Scope:** Add idle/recording transport and Record/Stop Recording/Clear controls. Use monotonic timestamps, preserve onset order, and finalize held or stolen notes correctly. Publish immutable RecordedNote events.
 
@@ -318,6 +318,16 @@ All 16 unit/12 browser tests and build passed. See `test/render-results.md`.
 **Acceptance:** Events have finite nonnegative deltaMs/durationMs; overlaps and release order do not corrupt onset order; saved data is reusable.
 
 **Verification:** Test simultaneous notes, out-of-order releases, stolen voices, stop with held notes, clear, and empty recording.
+
+Evidence: recorder reserves immutable published events in onset order using
+performance.now() timestamps and per-owner recording IDs. Stop finalizes held
+events and releases input; stolen voices finalize at logical end. Clear is guarded
+during recording. Six recorder unit tests pass, including overlaps, reverse
+release order, timing validation, and empty sessions. Browser recording tests
+verify held-stop release, repeat suppression, nine-touch FIFO stealing and 375px
+controls. Existing input/render checks and production build passed. Prompt logging
+is intentionally omitted for this task at the user's explicit request. Replay
+and cancellation stages remain pending; stages must be committed sequentially.
 
 **Suggested commit:** `feat: record polyphonic notes into a FIFO sequence`
 

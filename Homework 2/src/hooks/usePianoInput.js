@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+const ignore = () => {};
 
 /** Own live input independently from audio allocation, including stolen holds. */
-export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoiceEnd }) {
+export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoiceEnd, onLiveNoteOn = ignore, onLiveNoteOff = ignore }) {
   const held = useRef(new Map());
   const mounted = useRef(false);
   const [pressedMidi, setPressedMidi] = useState(() => new Set());
@@ -22,9 +23,10 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
     held.current.delete(ownerId);
     input.controller.abort();
     clearTimeout(input.timer);
+    onLiveNoteOff(ownerId);
     if (input.voice) noteOff(input.voice, ownerId);
     synchronize();
-  }, [noteOff, synchronize]);
+  }, [noteOff, synchronize, onLiveNoteOff]);
 
   const clearHeld = useCallback(() => {
     for (const [ownerId, input] of held.current) onNoteOff(input.midi, ownerId);
@@ -34,23 +36,29 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
     if (held.current.has(ownerId)) return;
     const input = { midi, controller: new AbortController(), voice: null, timer: null };
     held.current.set(ownerId, input);
+    onLiveNoteOn(midi, ownerId);
     void noteOn(midi, ownerId, input.controller.signal).then(voice => {
       // Release/repress can happen before the original initialization resolves.
       if (held.current.get(ownerId) !== input || input.controller.signal.aborted) {
         if (voice) noteOff(voice, ownerId);
         return;
       }
-      if (!voice) { held.current.delete(ownerId); synchronize(); return; }
+      if (!voice) { held.current.delete(ownerId); onLiveNoteOff(ownerId); synchronize(); return; }
       input.voice = voice;
       synchronize();
       // Assistive clicks have no held key/pointer. Give them a short audible pulse.
       if (durationMs !== undefined) input.timer = setTimeout(() => onNoteOff(midi, ownerId), durationMs);
     });
-  }, [noteOn, noteOff, onNoteOff, synchronize]);
+  }, [noteOn, noteOff, onNoteOff, synchronize, onLiveNoteOn, onLiveNoteOff]);
+
+  const onVoiceEnd = useCallback(event => {
+    for (const ownerId of event.ownerIds) onLiveNoteOff(ownerId, event.endedAtMs);
+    synchronize();
+  }, [onLiveNoteOff, synchronize]);
 
   useEffect(() => {
     mounted.current = true;
-    const unsubscribe = subscribeVoiceEnd(synchronize);
+    const unsubscribe = subscribeVoiceEnd(onVoiceEnd);
     const visibility = () => { if (document.hidden) clearHeld(); };
     window.addEventListener('blur', clearHeld);
     document.addEventListener('visibilitychange', visibility);
@@ -61,7 +69,7 @@ export function usePianoInput({ noteOn, noteOff, getActiveVoices, subscribeVoice
       document.removeEventListener('visibilitychange', visibility);
       clearHeld();
     };
-  }, [subscribeVoiceEnd, synchronize, clearHeld]);
+  }, [subscribeVoiceEnd, onVoiceEnd, clearHeld]);
 
-  return { pressedMidi, onNoteOn, onNoteOff };
+  return { pressedMidi, onNoteOn, onNoteOff, clearHeld };
 }

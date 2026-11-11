@@ -50,6 +50,19 @@ main > section + section { margin-top: 1.5rem; }
   cursor: pointer;
 }
 .audio-enable:hover { text-decoration: underline; }
+.transport-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.transport-actions button {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #525b69;
+  border-radius: 0.3rem;
+  background: #fff;
+  color: #20242c;
+  font: inherit;
+  cursor: pointer;
+}
+.transport-actions button:disabled { opacity: 0.55; cursor: default; }
+.recorded-notes { padding-left: 1.5rem; }
 
 .piano-viewport {
   max-width: 100%;
