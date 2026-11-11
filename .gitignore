@@ -1,6 +1,7 @@
 # Dependencies and production output (at any project depth)
 node_modules/
 dist/
+.npm-cache/
 
 # Local environment configuration; keep safe example/template files visible
 .env
