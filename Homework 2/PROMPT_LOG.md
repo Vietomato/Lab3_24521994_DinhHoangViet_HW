@@ -203,3 +203,46 @@ The branch is `Homework-2`, but this session still cannot write `.git/index.lock
 git add .
 git commit -m "docs: define piano tasks and timing contracts"
 ```
+
+## 2026-11-12 — Restore and verify piano application shell
+
+### Exact prompt received
+
+```text
+Prepare the React 19 and Vite application shell using the existing package manager.\
+\
+Reuse an existing application when present. Do not create an unnecessary nested project.\
+\
+Add a semantic header and main area. Prepare folders for components, hooks, music data, audio, sequencing, and styles.\
+\
+Remove only starter content belonging to this application.\
+\
+Run the production build and fix errors introduced by this task.
+```
+
+### Inspection and changes
+
+- Read Homework 2/project_rules.md and reviewed task_decomposition.md before editing. Inspected Git status/history and current files: latest commit 8722acf reverted the earlier shell; the working tree was clean. Existing src/types.js and piano documents remained, along with ignored npm dependencies/cache/build output.
+- Reused the existing piano shell and its npm lockfile from commit 2821792 using read-only git show, writing only missing application files. Did not alter Git history or revert the revert commit. No unrelated files overwritten.
+- Restored package.json/package-lock.json, index.html, vite.config.js, public/favicon.svg, src/main.jsx, src/App.jsx, src/styles/piano.css, and folder placeholders for components/hooks/music/audio/sequencer directly in Homework 2.
+- Kept semantic header/main/section, a skip link, visible focus, and fluid base layout. Preserved JSDoc contracts. No note generation, keys, audio, recording, or replay implemented, and no unrelated starter content removed.
+- Marked Task 03 verified again with the new evidence. Used existing npm tooling/dependencies, without a nested project or sibling package configuration.
+
+### Actual verification
+
+- PASS: npm.cmd install --cache .npm-cache --no-audit --no-fund (up to date).
+- PASS: npm.cmd run build; 16 modules transformed in 157ms, no build errors.
+- PASS: npm.cmd ls --depth=0 confirmed React/React DOM 19.3.1, Vite 8.3.8, and @vitejs/plugin-react 6.3.0.
+- PASS: node --check src/types.js.
+- PASS: existing piano dev server at http://127.0.0.1:5175/ returned HTTP 200; reused and left running.
+- PASS: actual Edge browser checks at 375px verified title, header/main landmarks, no horizontal overflow, visible skip-link focus, Enter navigation to main, and no browser console warnings/errors, page exceptions, or HTTP failures. Browser closed afterward. Used already-installed browser tooling without modifying Homework 1.
+- PASS: git diff --check and ignored dependency/build/cache paths verified after the log update. No piano lint/test scripts exist yet. Feature behavior remains NOT VERIFIED.
+- No commits, pushes, staging, or history changes performed.
+
+### Assistant response
+
+Restored the React 19/Vite shell in `Homework 2`, reusing its previous npm configuration and preserving the contracts.
+
+Production build and browser checks passed, including 375px layout and keyboard focus. Updated the task plan and `PROMPT_LOG.md`.
+
+Localhost: http://127.0.0.1:5175/. No piano features or commits were added.
