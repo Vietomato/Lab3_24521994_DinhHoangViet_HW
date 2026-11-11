@@ -1,0 +1,48 @@
+# Dependencies, build output, and tool caches at any project depth
+node_modules/
+dist/
+.vite/
+.npm-cache/
+coverage/
+test-results/
+playwright-report/
+
+# Local environments; retain sanitized examples and templates
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+!.env.*.example
+!.env.*.sample
+!.env.*.template
+
+# Local credentials and private keys
+.secrets/
+secrets.local.*
+credentials.json
+service-account*.json
+*.key
+*.private.pem
+id_rsa
+id_ed25519
+**/.aws/credentials
+.ssh/
+
+# Logs and temporary editor/build state; keep shared editor config visible
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+*.tsbuildinfo
+*.sublime-workspace
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+**/.idea/shelf/
+**/.vscode/*.local.json
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
