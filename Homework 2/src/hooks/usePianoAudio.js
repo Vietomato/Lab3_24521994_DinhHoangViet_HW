@@ -27,5 +27,21 @@ export function usePianoAudio() {
       return false;
     }
   }, []);
-  return { initialize, isReady, error };
+
+  const noteOn = useCallback(async (midi, ownerId, signal) => {
+    const engine = engineRef.current;
+    if (!engine) return null;
+    try {
+      const voice = await engine.noteOn(midi, ownerId, signal);
+      if (engineRef.current === engine) { setError(null); setIsReady(true); }
+      return voice;
+    } catch (cause) {
+      if (engineRef.current === engine && !signal?.aborted) setError(cause.message);
+      return null;
+    }
+  }, []);
+  const noteOff = useCallback((voice, ownerId) => engineRef.current?.noteOff(voice, ownerId), []);
+  const getActiveVoices = useCallback(() => engineRef.current?.getActiveVoices() ?? [], []);
+  const subscribeVoiceEnd = useCallback(listener => engineRef.current?.subscribeVoiceEnd(listener) ?? (() => {}), []);
+  return { initialize, isReady, error, noteOn, noteOff, getActiveVoices, subscribeVoiceEnd };
 }

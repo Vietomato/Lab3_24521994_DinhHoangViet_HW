@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.svg"><title>Piano input lifecycle fixture</title></head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React, { StrictMode } from 'react';
+      import { createRoot } from 'react-dom/client';
+      import App from '/src/App.jsx';
+      import '/src/styles/piano.css';
+      window.mountPiano = () => {
+        window.testRoot = createRoot(document.getElementById('root'));
+        testRoot.render(React.createElement(StrictMode, null, React.createElement(App)));
+      };
+      mountPiano();
+    </script>
+  </body>
+</html>

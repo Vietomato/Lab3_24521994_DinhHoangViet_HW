@@ -25,6 +25,7 @@
  * @callback NoteOnCallback
  * @param {number} midi
  * @param {string} ownerId
+ * @param {number} [durationMs] Optional short pulse for assistive clicks without release events.
  * @returns {void}
  */
 /**

@@ -440,3 +440,50 @@ Test eight-note allocation, ninth-note stealing, duplicate activation, same-pitc
 Implemented the eight-voice FIFO pool with generation-safe ownership, separate release tails, and voice-end/steal notifications.
 
 All 16 tests, real-browser eight-voice checks, and the production build passed. Updated the task plan and prompt log. Piano-key input remains unconnected; no commit was made.
+
+## 2026-11-12 — Live piano input ownership
+
+### Exact prompt received
+
+```text
+Connect piano input to note-on and note-off.\
+\
+Requirements:\
+- Support mouse, touch, and pen.\
+- Handle pointer release, cancellation, and lost capture.\
+- Support sustained Enter and Space interaction on focused keys.\
+- Prevent synthetic click events from duplicating a note.\
+- Track input ownership so overlapping sources do not release each other's notes.\
+- Clear held notes on window blur and document hiding.\
+- Keep pressed visuals consistent when voices end or are stolen.\
+- A stolen note remains silent until released and pressed again.\
+\
+Verify chords, pointer movement outside keys, cancellation, native keyboard activation, and tab switching where possible.
+```
+
+### Changes
+
+- Read piano project rules and Task 08, and inspected current hooks/components/contracts and clean Git status before edits.
+- Added usePianoInput: separate held-owner records with AbortController, pending handle, and optional pulse timer. Early release cancels pending initialization; stale async results cannot release a new owner's generation. Clearing/unmount aborts pending inputs, removes listeners/subscriptions, cancels timers, and releases owned handles.
+- Extended usePianoAudio with stable engine noteOn/noteOff/snapshot/subscription adapters and inline error handling. Existing fresh-instance StrictMode lifecycle remains intact.
+- Connected PianoKey pointer down/up/cancel/lost capture through pointer IDs. Capture permits release outside the key. Native Enter/Space owns separate IDs; handled defaults are replaced to avoid synthetic/repeated clicks while Tab remains native. Key blur releases native ownership without releasing pointer owners.
+- Kept detail-zero assistive clicks available as a 120ms pulse after audio readiness, with its timer owned by the hook. Pointer-generated clicks add no duplicate note.
+- Pressed visuals derive from engine allocations and synchronize on voice-end/steal notifications. Input records stay held through stealing, suppressing retrigger until release/repress.
+- Updated App/instructions so keys initialize/play audio; preserved primitive key props and stable callbacks. No recording, replay, letter shortcut mapping, or render-performance claims added.
+- Added @playwright/test development dependency, a browser-test script/configuration, 10 persistent input regression tests, a StrictMode fixture, and test/README.md commands/limitations. Test output remains ignored.
+
+### Actual verification
+
+- PASS: npm.cmd test, all 16 existing metadata/audio tests.
+- First browser run: seven tests passed; pen/touch coordinate tests failed because test coordinates were below the viewport (measured y=906.29375 for an 800px viewport, elementFromPoint undefined). Corrected the tests to scroll keys into view before dispatching coordinate input; no product change was required for that harness error.
+- PASS: final npm.cmd run test:browser with TEST_BASE_URL=http://127.0.0.1:5175, all 10 tests passed in 8.9 seconds. Verified native audio source counts, mouse outside capture, cancel/lost capture, Enter/Space sustain/repeats, Tab/focus release, independent mixed owners, simulated blur/hidden cleanup, unexpected source end, early release while resume is pending, assistive pulse, 375px fit, pen emulation, nine simultaneous touch notes with oldest-key stealing, no resurrection on move, and successful release/repress.
+- PASS: StrictMode input unmount closed active contexts/removed ended callbacks; fresh mount played successfully. Browser console warnings/errors and uncaught page errors were absent across tested flows. Test-runner NO_COLOR/FORCE_COLOR warning is an environment warning outside the browser console.
+- PASS: npm.cmd run build, 22 modules transformed, 145ms. git diff --check passed with LF-to-CRLF warnings. Reviewed status/diff summary and confirmed test reports remain ignored. No lint script exists.
+- NOT VERIFIED: actual speaker sound quality, physical touch/pen, real OS/browser tab switching, screen-reader behavior, and React DevTools render profiling. Visibility/blur checks are simulated; CDP touch/pen are emulated.
+- Updated Task 08 and this log. No commits, pushes, staging, or Git history changes performed.
+
+### Assistant response
+
+Connected piano keys to live audio with independent input ownership, sustained Enter/Space, pointer capture/cancellation, and stolen-voice visual updates.
+
+All 16 unit tests, 10 browser tests, and the production build passed. Updated the task plan and prompt log. Physical-device, real tab-switching, and listening checks remain manual. No commit made.

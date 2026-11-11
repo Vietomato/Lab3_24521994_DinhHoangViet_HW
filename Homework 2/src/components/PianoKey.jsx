@@ -1,10 +1,12 @@
 import { memo } from 'react';
 
 /**
- * Controlled presentation only; input/audio ownership is added in a later task.
- * @param {Pick<import('../types.js').PianoKeyProps, 'midi'|'noteName'|'isBlack'|'isPressed'>} props
+ * Native input handlers; audio and ownership remain in the hooks/engine.
+ * @param {import('../types.js').PianoKeyProps} props
  */
-function PianoKey({ midi, noteName, isBlack, isPressed }) {
+function PianoKey({ midi, noteName, isBlack, isPressed, onNoteOn, onNoteOff }) {
+  const nativeOwner = key => `native:${midi}:${key}`;
+  const releasePointer = event => onNoteOff(midi, `pointer:${event.pointerId}`);
   return (
     <button
       type="button"
@@ -12,6 +14,33 @@ function PianoKey({ midi, noteName, isBlack, isPressed }) {
       aria-label={`${noteName.replace('#', ' sharp ')} piano key`}
       aria-pressed={isPressed}
       data-midi={midi}
+      onPointerDown={event => {
+        if (event.button !== 0) return;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        onNoteOn(midi, `pointer:${event.pointerId}`);
+      }}
+      onPointerUp={releasePointer}
+      onPointerCancel={releasePointer}
+      onLostPointerCapture={releasePointer}
+      onKeyDown={event => {
+        if (!['Enter', ' '].includes(event.key)) return;
+        // Replace only this key's activation default, avoiding repeat clicks/scroll.
+        event.preventDefault();
+        if (!event.repeat) onNoteOn(midi, nativeOwner(event.key));
+      }}
+      onKeyUp={event => {
+        if (!['Enter', ' '].includes(event.key)) return;
+        event.preventDefault();
+        onNoteOff(midi, nativeOwner(event.key));
+      }}
+      onBlur={() => {
+        onNoteOff(midi, nativeOwner('Enter'));
+        onNoteOff(midi, nativeOwner(' '));
+      }}
+      onClick={event => {
+        // Pointer paths already started; native key defaults were handled above.
+        if (event.detail === 0) onNoteOn(midi, `assistive:${midi}`, 120);
+      }}
     >
       <span className="piano-key__name">{noteName}</span>
       <span className="piano-key__state" aria-hidden="true">{isPressed ? '▼ Held' : '○'}</span>

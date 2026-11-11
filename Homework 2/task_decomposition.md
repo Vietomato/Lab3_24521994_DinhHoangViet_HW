@@ -262,7 +262,7 @@ integration and audible quality remain for subsequent/manual checks.
 
 ## Task 08 — Live note input and state ownership
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify live input (2026-11-12; physical-device/listening checks remain manual).
 
 **Scope:** Connect pointer and keyboard note-on/off to the engine. Track owners, capture/release/cancel, blur/hidden state, and stolen-note UI updates. Prevent synthetic-click duplicate activation.
 
@@ -271,6 +271,16 @@ integration and audible quality remain for subsequent/manual checks.
 **Acceptance:** Sustained notes and chords work; release/cancel does not stick; each intended note starts once.
 
 **Verification:** Pointer drag/release, cancellation, Enter/Space hold/release, blur, tab switching, multi-input, and real touch if available.
+
+Evidence: `usePianoInput` tracks each owner, pending AbortController, voice handle,
+and assistive pulse timer independently. Engine notifications synchronize pressed
+visuals while stolen owners remain held/silent. Native key handlers suppress only
+handled activation defaults and preserve Tab; pointer capture handles outside
+release/cancel/loss. All 16 unit tests, 10 Edge browser tests, and production build
+passed. Browser checks include nine-touch FIFO chords, pen emulation, mixed
+owners, quick release before resume, and StrictMode unmount/remount. Blur/hidden
+events were simulated; real tab switching, physical devices, and audible quality
+remain NOT VERIFIED. See `test/README.md` for repeatable commands.
 
 **Suggested commit:** `feat: connect live piano input and release handling`
 
