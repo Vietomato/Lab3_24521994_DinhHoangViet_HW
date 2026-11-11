@@ -172,7 +172,7 @@ features implemented yet; the existing dev server is available on port 5175.
 
 ## Task 04 — Algorithmic note generation
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify this task (2026-11-12).
 
 **Scope:** Generate MIDI 21–108 metadata, correct note/octave names, black-key classification, and equal-temperament frequencies. Keep metadata stable outside component rendering.
 
@@ -181,6 +181,12 @@ features implemented yet; the existing dev server is available on port 5175.
 **Acceptance:** 88 unique notes: 52 white and 36 black; endpoints A0/C8; MIDI 69 equals 440 Hz.
 
 **Verification:** Test counts, bounds, uniqueness, naming, black-key pattern, and representative frequencies.
+
+Evidence: `npm.cmd test` passed five focused tests covering 88 unique consecutive
+notes, 52 white/36 black keys, A0/C8 endpoints and octave boundaries, accidental
+pitch classes, representative frequencies including A4=440Hz, octave ratios,
+deterministic generation, and frozen metadata. Production build passed. The
+metadata is exported once at module scope; keyboard rendering is a later task.
 
 **Suggested commit:** `feat: generate all 88 piano notes algorithmically`
 

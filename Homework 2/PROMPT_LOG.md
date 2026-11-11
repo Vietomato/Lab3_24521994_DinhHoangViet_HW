@@ -246,3 +246,45 @@ Restored the React 19/Vite shell in `Homework 2`, reusing its previous npm confi
 Production build and browser checks passed, including 375px layout and keyboard focus. Updated the task plan and `PROMPT_LOG.md`.
 
 Localhost: http://127.0.0.1:5175/. No piano features or commits were added.
+
+## 2026-11-12 — Algorithmic piano note metadata
+
+### Exact prompt received
+
+```text
+Implement a pure function that generates piano note metadata for MIDI 21 through 108 inclusive.\
+\
+Requirements:\
+- Exactly 88 unique notes, from A0 to C8.\
+- Exactly 52 white keys and 36 black keys.\
+- Correct note names and octave numbers.\
+- Frequency calculated as:\
+  440 * 2 ** ((midi - 69) / 12)\
+- Stable metadata generated outside component rendering.\
+- No hardcoded list of 88 notes or JSX elements.\
+\
+Add focused tests for counts, endpoints, uniqueness, black-key classification, and representative frequencies, including A4 = 440 Hz.
+```
+
+### Changes
+
+- Read Homework 2/project_rules.md and reviewed the task plan, existing contract, files, package manager, and Git status before changes. Working tree was clean.
+- Added src/music/notes.js with pure generatePianoNotes(): generates MIDI 21–108 using Array.from, a 12-pitch chromatic lookup, calculated octave numbers, accidental classification, and the required equal-temperament formula.
+- Uses the existing ImmutablePianoNote JSDoc contract. Freezes each generated note and the array. Exports pianoNotes once at module scope for stable component imports; generator calls return independent, equal data without side effects or browser/React dependencies.
+- Removed the replaced music-folder placeholder. No keyboard JSX, audio, input, or transport features added.
+- Added test/notes.test.js with five focused Node tests and an npm test script using the built-in test runner; no dependencies added.
+- Marked Task 04 complete with actual verification evidence.
+
+### Actual verification
+
+- PASS: npm.cmd test, five tests passed. Checks exactly 88 unique consecutive MIDI values/names; 52 white and 36 black keys; A0/C8 bounds and octave boundaries; every note's accidental classification; A4 exactly 440Hz and representative A0/C4/F#4/A5/C8 frequencies; positive increasing frequencies and octave ratios; deterministic independent generation; frozen array/objects and rejected mutations.
+- PASS: npm.cmd run build, 16 modules transformed, 215ms. Metadata is not wired into the shell yet; direct Node imports in tests verify the new module separately.
+- PASS: git diff --check, with LF-to-CRLF warning for package.json. Reviewed status. No lint script exists.
+- NOT VERIFIED: piano UI, heard audio, voice behavior, recording/replay, and render profiling; these are outside this task and not implemented yet.
+- Updated the task plan and this log. No commits, pushes, or history changes performed.
+
+### Assistant response
+
+Added `generatePianoNotes()` and stable, immutable `pianoNotes` metadata in `Homework 2/src/music/notes.js`.
+
+All five tests passed: 88 unique notes, 52 white/36 black keys, names/octaves, frequencies including A4 = 440 Hz, and immutability. Production build passed. Updated the task plan and prompt log; no piano UI or audio was added.
