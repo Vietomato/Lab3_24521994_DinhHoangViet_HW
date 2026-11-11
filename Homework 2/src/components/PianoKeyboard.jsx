@@ -7,7 +7,7 @@ import { pianoNotes } from '../music/notes.js';
 let whiteCount = 0;
 const positionedNotes = pianoNotes.map((note) => {
   const column = note.isBlack ? whiteCount * 2 : whiteCount++ * 2 + 1;
-  return { note, style: Object.freeze({ gridColumn: `${column} / span 2` }) };
+  return { note, column };
 });
 
 /**
@@ -28,9 +28,9 @@ export default function PianoKeyboard({ pressedMidi, onNoteOn, onNoteOff }) {
       <div className="piano-viewport" role="region" aria-label="88-key piano, A0 to C8"
         aria-describedby={instructionsId} tabIndex={0}>
         <div className="piano-keyboard">
-          {positionedNotes.map(({ note, style }) => (
+          {positionedNotes.map(({ note, column }) => (
             <div key={note.midi} className={`piano-key-slot ${note.isBlack ? 'piano-key-slot--black' : ''}`}
-              style={style}>
+              style={{ gridColumn: `${column} / span 2` }}>
               <PianoKey midi={note.midi} noteName={note.noteName} isBlack={note.isBlack}
                 isPressed={pressedMidi.has(note.midi)} onNoteOn={onNoteOn} onNoteOff={onNoteOff} />
             </div>
