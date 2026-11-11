@@ -6,7 +6,7 @@
  * All numeric values must be finite. Duration and frequency must be positive.
  * @typedef {Object} SoundConfig
  * @property {SoundKind} kind
- * @property {number} durationSeconds
+ * @property {number} durationSeconds Duration in (0, 5] seconds.
  * @property {number} frequencyHz Base oscillator or filter frequency.
  * @property {number} gain Voice gain in the range [0, 1].
  */
