@@ -27,9 +27,127 @@ AI_FAILURE_AUDIT.md
 README.md
 ```
 
-## Contracts to define before feature implementation
+## JSDoc contracts
 
 Use JSDoc; TypeScript migration is not required.
+
+The following contracts are documentation, not application implementation.
+When implementation starts, place the shared typedefs in `src/types.js` and
+import them through JSDoc. Paths under `src/` are relative to the eventual
+application root. This plan and its authoritative rules stay in `Homework 1/`;
+`PROMPT_LOG.md` stays at the repository root.
+
+```javascript
+/** @typedef {'KeyW'|'KeyA'|'KeyS'|'KeyD'|'KeyJ'|'KeyK'|'KeyL'} PadCode */
+/** @typedef {'kick'|'snare'|'closedHat'|'openHat'|'tom'|'clap'|'rim'} SoundKind */
+
+/**
+ * Parameters for a local Web Audio synthesis voice; no sample URLs.
+ * All numeric values must be finite. Duration and frequency must be positive.
+ * @typedef {Object} SoundConfig
+ * @property {SoundKind} kind
+ * @property {number} durationSeconds
+ * @property {number} frequencyHz Base oscillator or filter frequency.
+ * @property {number} gain Voice gain in the range [0, 1].
+ */
+
+/**
+ * @typedef {Object} DrumPad
+ * @property {string} id Unique, stable configuration ID and React key.
+ * @property {string} label Human-readable, accessible pad name.
+ * @property {PadCode} code Physical keyboard code; never a character keyCode.
+ * @property {SoundConfig} sound
+ */
+/** @typedef {DrumPad} DrumPadConfig */
+/** @typedef {'pointer'|'keyboard'|'native'} InputSource */
+
+/**
+ * Shared synchronous activation entry point; schedules asynchronous audio work.
+ * Called exactly once per accepted input, never on release or ignored input.
+ * @callback ActivatePad
+ * @param {DrumPad} pad
+ * @param {InputSource} source
+ * @param {string} inputId Stable for the held input, e.g. keyboard:KeyW.
+ * @returns {void}
+ */
+/**
+ * Releases only this input's visual state; must not cut off a sounding voice.
+ * @callback ReleasePad
+ * @param {string} padId
+ * @param {InputSource} source
+ * @param {string} inputId
+ * @returns {void}
+ */
+
+/**
+ * @typedef {Object} DrumPadProps
+ * @property {DrumPad} pad
+ * @property {boolean} isActive Derived from all currently held input sources.
+ * @property {ActivatePad} onActivate
+ * @property {ReleasePad} onRelease
+ */
+
+/**
+ * @typedef {Object} HitEvent
+ * @property {string} id Unique event ID, independent of list position.
+ * @property {string} padId
+ * @property {string} label
+ * @property {number} timestampMs Unix epoch milliseconds at accepted activation.
+ */
+
+/**
+ * Lazily initializes/resumes audio from a user gesture and schedules one voice.
+ * Resolves after scheduling, not after playback ends. Rejects on failure or
+ * use after disposal; failures must produce an accessible inline error.
+ * @callback TriggerSound
+ * @param {SoundConfig} sound
+ * @returns {Promise<void>}
+ */
+/**
+ * @callback SetVolume
+ * @param {number} normalizedLevel Finite [0, 1]; reject invalid values.
+ * @returns {void}
+ */
+/**
+ * Idempotently stops voices, disconnects nodes, and closes the owned context.
+ * Also prevents pending initialization from reviving a disposed engine.
+ * @callback DisposeAudio
+ * @returns {Promise<void>}
+ */
+/**
+ * @typedef {Object} DrumAudioEngine
+ * @property {TriggerSound} trigger
+ * @property {SetVolume} setVolume Stores volume even before initialization.
+ * @property {DisposeAudio} dispose
+ * @property {function(): (AnalyserNode|null)} getAnalyser Null until initialized.
+ */
+
+/**
+ * @typedef {Object} DrumKeyboardOptions
+ * @property {ReadonlyMap<PadCode, DrumPad>} padMap
+ * @property {boolean} isEnabled
+ * @property {ActivatePad} onActivate Called with source 'keyboard'.
+ * @property {ReleasePad} onRelease Called with source 'keyboard'.
+ */
+/**
+ * Planned hook signature: useDrumKeyboard(options).
+ * @callback UseDrumKeyboard
+ * @param {DrumKeyboardOptions} options
+ * @returns {void}
+ */
+```
+
+Hook behavior: match `event.code`, ignore repeat and editable origins, and
+prevent defaults only for handled shortcuts. Release tracked keyboard inputs on
+keyup, blur, hidden document, disabling, dependency cleanup, and unmount. Never
+release pointer inputs when clearing keyboard inputs. Callback changes must not
+leave stale listeners or held state. Native Enter/Space activation must not
+duplicate global shortcuts or pointer clicks.
+
+The shared activation path creates one hit record for each accepted activation
+and requests one voice. Rejected audio requests show an error; a hit record means
+an input was accepted, not proof of audible playback. Ignored inputs create
+neither a voice request nor a hit record.
 
 | Contract | Fields or behavior |
 | --- | --- |
@@ -61,7 +179,8 @@ Commit: `docs: define drum studio project rules`
 - [ ] Adopt this task plan and define the JSDoc contracts above in an appropriate documentation or source location.
 - [ ] Specify scope, input behavior, acceptance criteria, and verification before implementation.
 
-Files: task_decomposition.md, contract definitions, PROMPT_LOG.md.
+Files: `Homework 1/task_decomposition.md` (including documented contracts),
+`PROMPT_LOG.md`; later implementation may move typedefs to `src/types.js`.
 
 Acceptance: each feature has a clear contract and independently reviewable task.
 
@@ -74,7 +193,8 @@ Commit: `docs: add task breakdown and drum studio contracts`
 - [ ] Prepare React 19 and Vite, reusing the existing setup and lockfile.
 - [ ] Add folders and a semantic header/main shell; remove only relevant starter content.
 
-Files: package configuration and lockfile if needed, application entry, App.jsx, base styles.
+Files: `package.json`, package-manager lockfile, `index.html`, `vite.config.js`,
+`src/main.jsx`, `src/App.jsx`, `src/styles/drum-studio.css`, and lint config if adopted.
 
 Acceptance: development server starts and production build succeeds; no unnecessary nested application.
 
