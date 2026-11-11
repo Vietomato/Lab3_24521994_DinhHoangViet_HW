@@ -214,7 +214,7 @@ later tasks. PianoKey uses memo, but update-render profiling is still NOT VERIFI
 
 ## Task 06 — Single-voice audio foundation
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify the single-voice foundation (2026-11-12).
 
 **Scope:** Create the user-gesture AudioContext lifecycle, oscillator/gain chain, master gain, error handling, and ADSR envelope. Implement safe stop/disconnect and idempotent dispose.
 
@@ -223,6 +223,16 @@ later tasks. PianoKey uses memo, but update-render profiling is still NOT VERIFI
 **Acceptance:** One voice can start/release cleanly; positive gain floor; no unusable engine after StrictMode cleanup/setup.
 
 **Verification:** Build, focused lifecycle tests, real-browser sound and release check when available.
+
+Evidence: `PolyphonicSynth` implements lazy gesture initialization/resume, a
+triangle oscillator with ADSR, positive exponential-ramp floor, a 40ms release,
+master headroom, node cleanup and idempotent disposal. `usePianoAudio` creates
+fresh instances per effect setup; Audio setup exposes initialization/retry with
+polite inline errors. All 11 tests passed (five metadata, six audio foundation).
+Real Edge verified an actual 440Hz oscillator/nonzero waveform, release cleanup,
+StrictMode unmount/remount, inline failures/retry, and repeated disposal. Build
+passed. Manual listening/release-click quality remains NOT VERIFIED. Keys remain
+silent; eight-voice FIFO allocation and full live input are still later tasks.
 
 **Suggested commit:** `feat: implement piano synthesis and ADSR envelope`
 

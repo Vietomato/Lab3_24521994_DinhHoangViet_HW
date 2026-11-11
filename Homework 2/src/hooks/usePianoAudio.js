@@ -1,0 +1,31 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { PolyphonicSynth } from '../audio/PolyphonicSynth.js';
+
+/** Each effect setup owns a fresh lazy engine, including StrictMode setup replay. */
+export function usePianoAudio() {
+  const engineRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => {
+    const engine = new PolyphonicSynth();
+    engineRef.current = engine;
+    return () => {
+      engineRef.current = null;
+      engine.dispose().catch(cause => console.error('Audio cleanup failed:', cause));
+    };
+  }, []);
+
+  const initialize = useCallback(async () => {
+    const engine = engineRef.current;
+    if (!engine) return false;
+    try {
+      await engine.initialize();
+      if (engineRef.current === engine) { setError(null); setIsReady(true); }
+      return true;
+    } catch (cause) {
+      if (engineRef.current === engine) { setError(cause.message); setIsReady(false); }
+      return false;
+    }
+  }, []);
+  return { initialize, isReady, error };
+}

@@ -38,6 +38,18 @@ a { color: #174b91; }
   transform: translateY(-200%);
 }
 .skip-link:focus { transform: translateY(0); }
+main > section + section { margin-top: 1.5rem; }
+.audio-enable {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #525b69;
+  border-radius: 0.3rem;
+  background: #fff;
+  color: #20242c;
+  font: inherit;
+  cursor: pointer;
+}
+.audio-enable:hover { text-decoration: underline; }
 
 .piano-viewport {
   max-width: 100%;

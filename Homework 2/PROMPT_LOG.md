@@ -335,3 +335,61 @@ Run the production build and inspect the layout if browser tools are available.
 Built `PianoKeyboard` and `PianoKey` from the generated metadata, with controlled pressed states, correctly positioned black keys, visible focus, and a labeled scrolling container.
 
 All 88 notes are reachable using Tab/Shift+Tab. Browser checks at 375px and 1280px, five tests, and the production build passed. Updated the task plan and prompt log. Audio remains disconnected.
+
+## 2026-11-12 — Single-voice Web Audio foundation and recovery confirmation
+
+### Exact audio task prompt received
+
+```text
+Implement the audio engine foundation using the browser's built-in Web Audio API.\
+\
+Requirements:\
+- No external APIs, API keys, or downloaded audio samples.\
+- Initialize or resume AudioContext following user interaction.\
+- Create oscillator and gain nodes for a note.\
+- Implement attack, decay, sustain, and release.\
+- Use a positive floor for exponential gain ramps, never zero.\
+- Use a short release of approximately 40 ms before stopping the oscillator.\
+- Route audio through a master GainNode with conservative gain levels.\
+- Stop and disconnect completed nodes.\
+- Make disposal idempotent.\
+- Keep the engine usable under React StrictMode setup and cleanup.\
+- Display initialization failures through accessible inline messages.\
+\
+Keep audio behavior separate from React rendering.
+```
+
+### Interruption and user steering
+
+- During initial work, an unfinished revert of commit 2821792 appeared, removing shell files and introducing conflicts. The attempted initial patch failed atomically because a deleted placeholder path did not exist; no audio feature files were applied at that time.
+- User selected: Keep the React/Vite shell.
+- Follow-up prompts: `chuyện gì xảy ra v`, `vậy giờ làm j`, and `tôi chyaj r`.
+- Advised running git revert --abort in the user's IDE terminal. After the final confirmation, inspected Git: Homework-2, up to date with origin/Homework-2, nothing to commit, working tree clean. Shell restored and no revert remained in progress. Did not run another revert or any Git mutation.
+
+### Implementation
+
+- Read the project rules and reviewed Task 06 and the existing contracts/current source before edits.
+- Added src/audio/PolyphonicSynth.js as the single-voice foundation. Uses a triangle oscillator at the required MIDI frequency formula; attack 10ms, decay 120ms to sustained gain, release 40ms, and positive exponential floor 0.0001. Conservative per-voice gain and master headroom reduce clipping.
+- Exposes initialize, noteOn, noteOff, setVolume, stopAll, and dispose. Initialization/resume is lazy and gesture-gated where userActivation is available. Shared resume promise handles concurrent calls; invalid input and aborted work do not allocate notes.
+- Duplicate/same-pitch owners share the voice. Generation-specific handle identity protects replacements from stale release. A different concurrent pitch is explicitly rejected at this stage; eight-voice FIFO allocation/subscriptions are still Task 07.
+- Ended cleanup disconnects oscillator/gain and releases ownership. A bounded fallback timer handles suspended audio clocks that delay ended events. stopAll waits for tails; dispose is idempotent, invalidates pending work, disconnects master, and closes the context.
+- Added src/hooks/usePianoAudio.js: fresh engine per effect setup, disposal on cleanup, and engine-identity guards against stale asynchronous state updates.
+- Added an Audio setup section and Enable audio button. It initializes without starting a note; failures appear in a polite inline status and retry is available. Piano keys remain silent/unconnected. No render-time audio resource construction or external audio service/sample.
+- Added responsive button styling and six focused engine tests; marked Task 06 complete with explicit remaining manual checks. Existing piano metadata/layout preserved.
+
+### Actual checks
+
+- Initial envelope test failed because an exact float assertion compared 10.129999999999999 with 10.13. Corrected the test to use timing tolerance; no product change was needed for this assertion issue.
+- PASS: npm.cmd test, all 11 tests (five metadata and six audio). Covers ADSR scheduling, A4 frequency, positive ramps, 40ms stop target, master routing/volume, owners/stale releases, invalid/aborted input, initialization failure/retry, disposal while resume is pending, fresh lifecycle, idempotent disposal, and bounded cleanup without ended.
+- PASS: npm.cmd run build, 21 modules transformed; final rerun 237ms.
+- PASS: actual Edge Web Audio check generated nonzero waveform from a 440Hz oscillator; note release disconnected its nodes; repeated disposal closed contexts; StrictMode app unmount/remount initialized fresh contexts without early creation.
+- PASS: simulated constructor failure displayed inline; retry after restoring the API succeeded. No browser console warnings/errors or uncaught page errors in the main lifecycle checks; failure/retry produced no unhandled page error. Browser closed after verification.
+- PASS: git diff --check; reviewed status and diff summary. Existing localhost returned HTTP 200 and remains at http://127.0.0.1:5175/.
+- NOT VERIFIED: audible sound quality/release clicks, physical devices, full polyphony/FIFO, key input integration, recording/replay, and key-render profiling. No claims based solely on mocked audio.
+- No commits, pushes, staging, or history changes performed.
+
+### Assistant response
+
+Git đã hết xung đột và shell được giữ nguyên. Tôi đã hoàn thành audio foundation: ADSR, release 40 ms, cleanup, StrictMode và lỗi inline.
+
+Cả 11 test, kiểm tra Web Audio trong Edge và production build đều qua. Đã cập nhật task plan và prompt log. Phím đàn chưa nối âm thanh; phần tám voice/FIFO ở bước sau. Chưa commit.
