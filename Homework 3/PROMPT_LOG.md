@@ -63,3 +63,55 @@ commit dùm
 - Checks: reviewed Git status, working diff and staged diff before staging; no unrelated changes were present. Contract syntax was checked again before commit. Staged content is reviewed before committing.
 - Build/browser checks remain pending application setup.
 - Commit reference: this entry is included in the commit titled `docs: define arena rules and domain contracts`; use Git history for its hash.
+
+## 2026-11-12 — Application shell
+
+Exact prompt received:
+
+````text
+```sql
+Prepare the React application shell, reusing the existing setup when available. Add semantic header/main regions and folders for components, hooks, API, data, and pure utilities.
+
+Maintain .gitignore and remove only relevant starter content.
+Run the production build.
+```
+````
+
+Work performed:
+
+- Inspected rules, task plan, Git status, existing sibling npm setup and workspace instructions. Initial working tree was clean; no AGENTS.md found. Homework 3 had no existing app or starter content to remove.
+- Reused sibling dependency version ranges and npm convention, creating an independent React 19/Vite JavaScript package and lockfile without modifying sibling projects.
+- Added index.html, Vite config, StrictMode/createRoot entry point, App.jsx and responsive base CSS. Shell includes header/main/footer, skip link, labeled sections and explicit local-demo/no-affiliation notices. Sections truthfully indicate features are pending.
+- Added tracked placeholder files for components, hooks, api, data and lib (pure utilities).
+- Reused Homework 2 ignore patterns locally for dependencies, build/cache output, environment files and credentials. Added README setup/build instructions and current limitations.
+- Task 01 hygiene is now complete. Task 03 is partially complete: shell/build are ready; deterministic fixtures and development-server/browser verification remain pending. No feature tasks are claimed complete.
+
+Files changed: .gitignore, README.md, index.html, package.json, package-lock.json, vite.config.js, src/App.jsx, src/main.jsx, src/index.css, five folder .gitkeep files, task_decomposition.md and this log.
+
+Verification and tooling:
+
+- PASS: `npm.cmd install --cache .npm-cache --no-audit --no-fund` installed 19 packages and generated package-lock.json.
+- PASS: `npm.cmd run build`, Vite 8.3.8, 16 transformed modules, exit 0; generated dist/index.html plus CSS/JS assets.
+- PASS: `git check-ignore node_modules/ dist/ .npm-cache/ .env credentials.json` matched every supplied path.
+- PASS: `git diff --check`; Git status contains only intended Homework 3 changes; generated folders are ignored. No staged changes or commits made.
+- Tooling issues corrected: PowerShell blocked npm.ps1, so used npm.cmd. Initial copy used a path relative to the wrong working directory; corrected it without overwriting unrelated files. Initial npm install could not write system cache (EPERM); retry used the ignored project-local cache successfully.
+- NOT VERIFIED: browser rendering, keyboard/375px layout and Lighthouse. No lint/test scripts or feature tests exist yet; no test scores claimed.
+
+Commit: pending user review; no automatic commit authorized by this prompt.
+
+## 2026-11-12 — Commit application shell
+
+Exact prompt received:
+
+````text
+```yaml
+Commit:
+chore: initialize React arena application
+```
+````
+
+- User authorized committing the application shell with the supplied message.
+- Scope: React/Vite package and lockfile, HTML/React/CSS shell, feature-folder placeholders, .gitignore, README, task progress and prompt log.
+- Verification: production build passed in the preceding implementation; reviewed Git status, working diff/check and staged content before commit. Generated dependencies, cache and dist remain ignored.
+- Browser checks remain pending; no unrelated files included.
+- Commit reference: the commit containing this entry, titled `chore: initialize React arena application`; hash available in Git history.

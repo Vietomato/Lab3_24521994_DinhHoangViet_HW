@@ -35,8 +35,8 @@ untracked planning/log files, with no package.json or lockfile. Existing sibling
 projects use npm/package-lock.json; use npm for the new app and preserve those
 projects. The rules file on disk is project.rules.md (not project.rules).
 JSDoc definitions are in src/contracts.js. Runtime validation, application setup
-and browser behavior remain future work. Task 01 remains open until repository
-ignore rules are maintained and verified.
+and browser behavior remained future work at Stage A. See task statuses below
+for subsequent progress.
 
 ## Suggested structure
 
@@ -90,7 +90,7 @@ Adapt locations to the existing project; do not recreate a working application u
 
 ## Task 01 — Project rules and repository hygiene
 
-- [ ] Implement and verify.
+- [x] Implement and verify (ignore rules checked during application-shell setup).
 
 **Scope:** Inspect existing repository instructions, package manager, working tree, and app structure. Adopt project.rules.md, maintain .gitignore, and start truthful prompt logging.
 
@@ -119,6 +119,8 @@ Adapt locations to the existing project; do not recreate a working application u
 ## Task 03 — Application shell and deterministic fixtures
 
 - [ ] Implement and verify.
+
+Progress (2026-11-12): React/Vite shell, semantic regions, feature folders and production build are ready. Deterministic fixtures and development-server/browser verification remain pending; this task is not complete.
 
 **Scope:** Prepare React 19 and Vite using the existing package manager. Add semantic page regions, two demo drops, four squads, a large stable-ID feed fixture, and explicit demo labeling.
 
