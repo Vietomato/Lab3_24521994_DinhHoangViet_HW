@@ -172,7 +172,7 @@ features implemented yet; the existing dev server is available on port 5175.
 
 ## Task 04 — Algorithmic note generation
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify this task (2026-11-12).
 
 **Scope:** Generate MIDI 21–108 metadata, correct note/octave names, black-key classification, and equal-temperament frequencies. Keep metadata stable outside component rendering.
 
@@ -182,11 +182,17 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Test counts, bounds, uniqueness, naming, black-key pattern, and representative frequencies.
 
+Evidence: `npm.cmd test` passed five focused tests covering 88 unique consecutive
+notes, 52 white/36 black keys, A0/C8 endpoints and octave boundaries, accidental
+pitch classes, representative frequencies including A4=440Hz, octave ratios,
+deterministic generation, and frozen metadata. Production build passed. The
+metadata is exported once at module scope; keyboard rendering is a later task.
+
 **Suggested commit:** `feat: generate all 88 piano notes algorithmically`
 
 ## Task 05 — Accessible keyboard layout
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify the silent keyboard layout (2026-11-12).
 
 **Scope:** Render notes from metadata with correct white/black placement and MIDI keys. Build native-button PianoKey and a contained horizontal piano viewport. Add labels, focus, pressed indicators, and keyboard navigation.
 
@@ -196,11 +202,19 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Build, visual endpoint checks, narrow viewport, Tab/arrows where implemented, and focus visibility.
 
+Evidence: five metadata tests and production build passed. Actual Edge checks
+verified 88 native buttons, 52/36 white/black split, black-key boundary alignment,
+Tab access and automatic scroll visibility for every MIDI 21–108, reverse Tab,
+controlled pressed props, visible focus, and no document overflow at 375/1280px.
+Inspected a 375px screenshot. Navigation is documented on the page. Audio/input
+ownership and transport controls are not connected yet; their tests remain for
+later tasks. PianoKey uses memo, but update-render profiling is still NOT VERIFIED.
+
 **Suggested commit:** `feat: build accessible 88-key piano layout`
 
 ## Task 06 — Single-voice audio foundation
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify the single-voice foundation (2026-11-12).
 
 **Scope:** Create the user-gesture AudioContext lifecycle, oscillator/gain chain, master gain, error handling, and ADSR envelope. Implement safe stop/disconnect and idempotent dispose.
 
@@ -210,11 +224,21 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Build, focused lifecycle tests, real-browser sound and release check when available.
 
+Evidence: `PolyphonicSynth` implements lazy gesture initialization/resume, a
+triangle oscillator with ADSR, positive exponential-ramp floor, a 40ms release,
+master headroom, node cleanup and idempotent disposal. `usePianoAudio` creates
+fresh instances per effect setup; Audio setup exposes initialization/retry with
+polite inline errors. All 11 tests passed (five metadata, six audio foundation).
+Real Edge verified an actual 440Hz oscillator/nonzero waveform, release cleanup,
+StrictMode unmount/remount, inline failures/retry, and repeated disposal. Build
+passed. Manual listening/release-click quality remains NOT VERIFIED. Keys remain
+silent; eight-voice FIFO allocation and full live input are still later tasks.
+
 **Suggested commit:** `feat: implement piano synthesis and ADSR envelope`
 
 ## Task 07 — Eight-voice FIFO pool
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify this task (2026-11-12).
 
 **Scope:** Add Map-based active allocation and generation-specific voice handles. At capacity release the oldest before starting the ninth distinct note. Handle duplicates, stale note-off, stolen held notes, and bounded release tails.
 
@@ -224,11 +248,21 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Test eight notes, ninth/tenth stealing, duplicate note-on, retriggered pitch, delayed release, and disposal.
 
+Evidence: active allocations now use Map insertion order, capped at eight distinct
+pitches, with separate resources for release tails and owner tracking for stolen
+held inputs. Generation-safe handles, FIFO snapshots, and subscribeVoiceEnd
+notifications are implemented. All 16 tests passed, including ninth/tenth stealing,
+concurrent duplicates, shared owners, retrigger/stale release, late ended callbacks,
+notifications, unsubscribe, reentrant disposal and full cleanup. Real Edge verified
+eight simultaneous native voices/nonzero signal, ninth stealing, replacement
+ownership and disposal without browser errors. Production build passed. Live-key
+integration and audible quality remain for subsequent/manual checks.
+
 **Suggested commit:** `feat: add eight-voice FIFO voice stealing`
 
 ## Task 08 — Live note input and state ownership
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify live input (2026-11-12; physical-device/listening checks remain manual).
 
 **Scope:** Connect pointer and keyboard note-on/off to the engine. Track owners, capture/release/cancel, blur/hidden state, and stolen-note UI updates. Prevent synthetic-click duplicate activation.
 
@@ -238,11 +272,22 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Pointer drag/release, cancellation, Enter/Space hold/release, blur, tab switching, multi-input, and real touch if available.
 
+Evidence: `usePianoInput` tracks each owner, pending AbortController, voice handle,
+and assistive pulse timer independently. Engine notifications synchronize pressed
+visuals while stolen owners remain held/silent. Native key handlers suppress only
+handled activation defaults and preserve Tab; pointer capture handles outside
+release/cancel/loss. All 16 unit tests, 10 Edge browser tests, and production build
+passed. Browser checks include nine-touch FIFO chords, pen emulation, mixed
+owners, quick release before resume, and StrictMode unmount/remount. Blur/hidden
+events were simulated; real tab switching, physical devices, and audible quality
+remain NOT VERIFIED. See `test/README.md` for repeatable commands.
+
 **Suggested commit:** `feat: connect live piano input and release handling`
 
 ## Task 09 — Memoized key isolation
 
-- [ ] Implement and verify this task.
+- [x] Verify memo boundaries and measured browser execution isolation (2026-11-12).
+- [ ] Capture React DevTools Profiler UI evidence — NOT VERIFIED; UI unavailable in this session.
 
 **Scope:** Wrap PianoKey in React.memo; stabilize callbacks and primitive props. Remove unnecessary object/collection props or changing inline handlers at the parent boundary.
 
@@ -252,11 +297,19 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Record actual React DevTools Profiler update evidence after initial mount. Report unavailable profiling as NOT VERIFIED; separately inspect stealing transitions.
 
+Evidence: retained memo's default shallow comparison, primitive per-key props and
+stable callbacks. Cached layout style objects and preserved pressed-state identity
+when active MIDI values are unchanged. CDP precise execution counts measured one
+key body for press/release and two for FIFO stealing without StrictMode; StrictMode
+doubled those calls. Mounting was measured separately (88/176). Root React Profiler
+callbacks were recorded by the test fixture; they are not a DevTools UI capture.
+All 16 unit/12 browser tests and build passed. See `test/render-results.md`.
+
 **Suggested commit:** `perf: isolate piano key updates with React memo`
 
 ## Task 10 — FIFO recording
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify FIFO recording (2026-11-12; commit `c012e08`).
 
 **Scope:** Add idle/recording transport and Record/Stop Recording/Clear controls. Use monotonic timestamps, preserve onset order, and finalize held or stolen notes correctly. Publish immutable RecordedNote events.
 
@@ -266,11 +319,21 @@ features implemented yet; the existing dev server is available on port 5175.
 
 **Verification:** Test simultaneous notes, out-of-order releases, stolen voices, stop with held notes, clear, and empty recording.
 
+Evidence: recorder reserves immutable published events in onset order using
+performance.now() timestamps and per-owner recording IDs. Stop finalizes held
+events and releases input; stolen voices finalize at logical end. Clear is guarded
+during recording. Six recorder unit tests pass, including overlaps, reverse
+release order, timing validation, and empty sessions. Browser recording tests
+verify held-stop release, repeat suppression, nine-touch FIFO stealing and 375px
+controls. Existing input/render checks and production build passed. Prompt logging
+is intentionally omitted for this task at the user's explicit request. Replay
+and cancellation stages remain pending; stages must be committed sequentially.
+
 **Suggested commit:** `feat: record polyphonic notes into a FIFO sequence`
 
 ## Task 11 — Concurrent variable-speed replay
 
-- [ ] Implement and verify this task.
+- [x] Implement and verify Stage 2 (2026-11-12; stage commit pending).
 
 **Scope:** Implement FIFO onset scheduling from cumulative target times. Schedule note-off independently with voice handles. Add 0.5x/1x/2x controls and transport ownership; disable live playing/recording during replay.
 
@@ -279,6 +342,19 @@ features implemented yet; the existing dev server is available on port 5175.
 **Acceptance:** Chords overlap; onset gaps and durations scale by speed; saved events are not consumed; completion waits for the final release.
 
 **Verification:** Use fake timers/clock to test event ordering, overlapping durations, all speeds, empty/invalid input, and natural completion. Verify audible replay separately.
+
+Evidence: the scheduler snapshots recorded events and speed, waits against
+cumulative monotonic targets, and schedules generation-specific releases
+independently. Completion waits for owned release tails. Live input/Record/Clear
+are guarded during playback; speed changes affect the next run; saved data is
+unchanged. All 32 unit tests, 15 browser tests and build passed. Fake-clock tests
+cover all speeds, FIFO overlap, snapshot isolation, timing validation/overflow,
+allocation delay, failure cleanup, and empty/concurrent/repeated Play. Browser
+checks cover real replayed chords, pressed visuals, all speeds, transport gates,
+natural completion and narrow layout. Two confirmed Stage 2 defects and fixes
+are in AI_FAILURE_AUDIT.md. Prompt logging is omitted at the user's request.
+Stage 3 AbortController/Stop Sequence/race tests remain pending; lifecycle cleanup
+currently uses an internal cancellation flag. Audible quality remains manual.
 
 **Suggested commit:** `feat: replay recorded chords at variable speeds`
 

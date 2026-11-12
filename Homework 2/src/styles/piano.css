@@ -38,3 +38,78 @@ a { color: #174b91; }
   transform: translateY(-200%);
 }
 .skip-link:focus { transform: translateY(0); }
+main > section + section { margin-top: 1.5rem; }
+.audio-enable {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #525b69;
+  border-radius: 0.3rem;
+  background: #fff;
+  color: #20242c;
+  font: inherit;
+  cursor: pointer;
+}
+.audio-enable:hover { text-decoration: underline; }
+.transport-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.transport-actions button {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #525b69;
+  border-radius: 0.3rem;
+  background: #fff;
+  color: #20242c;
+  font: inherit;
+  cursor: pointer;
+}
+.transport-actions button:disabled { opacity: 0.55; cursor: default; }
+.recorded-notes { padding-left: 1.5rem; }
+.transport-speed { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+.transport-speed select { min-height: 2.75rem; padding: 0.4rem; font: inherit; }
+.piano-key:disabled { cursor: default; }
+
+.piano-viewport {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.5rem;
+  border: 1px solid #747b87;
+  border-radius: 0.4rem;
+  overscroll-behavior-x: contain;
+}
+
+.piano-keyboard {
+  display: grid;
+  grid-template-columns: repeat(104, 1.5rem);
+  width: max-content;
+  padding: 0.25rem;
+  align-items: start;
+}
+
+.piano-key-slot { grid-row: 1; height: 14rem; min-width: 0; }
+.piano-key-slot--black { width: 1.9rem; height: 9rem; justify-self: center; z-index: 1; }
+.piano-key-slot--black:focus-within { z-index: 2; }
+
+.piano-key {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 0.1rem;
+  border: 1px solid #525b69;
+  border-radius: 0 0 0.3rem 0.3rem;
+  font: 700 0.75rem system-ui, sans-serif;
+  cursor: pointer;
+  touch-action: pan-x;
+  scroll-margin-inline: 2rem;
+}
+.piano-key--white { background: #fff; color: #20242c; box-shadow: inset 0 -4px 0 #ccd1d9; }
+.piano-key--black { background: #20242c; color: #fff; box-shadow: inset 0 -4px 0 #080b10; }
+.piano-key__state { font-size: 0.625rem; min-height: 1em; }
+.piano-key:focus-visible { outline: 3px solid #b45309; outline-offset: -4px; }
+.piano-key[aria-pressed="true"] { border-bottom: 6px double currentColor; box-shadow: inset 0 -8px 0 #8a95a6; }
+.piano-key:active { border-bottom: 6px double currentColor; }
+@media (hover: hover) {
+  .piano-key:hover { text-decoration: underline; text-underline-offset: 0.2rem; }
+}

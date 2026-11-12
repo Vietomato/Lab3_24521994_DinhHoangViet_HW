@@ -25,6 +25,7 @@
  * @callback NoteOnCallback
  * @param {number} midi
  * @param {string} ownerId
+ * @param {number} [durationMs] Optional short pulse for assistive clicks without release events.
  * @returns {void}
  */
 /**
@@ -45,6 +46,7 @@
  * @property {boolean} isPressed Actual allocated/held state, cleared on stealing.
  * @property {NoteOnCallback} onNoteOn
  * @property {NoteOffCallback} onNoteOff
+ * @property {boolean} [disabled] Live input unavailable during replay.
  */
 
 /**
@@ -67,6 +69,7 @@
  * @property {VoiceHandle} voice
  * @property {'released'|'stolen'|'disposed'} reason
  * @property {number} endedAtMs Monotonic performance.now() domain.
+ * @property {ReadonlyArray<string>} ownerIds Owner snapshot at logical end, for UI/recorder cleanup.
  */
 
 /**
@@ -126,10 +129,12 @@
  * @property {InitializeAudio} initialize
  * @property {StartVoice} noteOn
  * @property {ReleaseVoice} noteOff
+ * @property {function(VoiceHandle): Promise<void>} waitForVoice Await this generation's bounded tail.
  * @property {SetVolume} setVolume
  * @property {StopAllVoices} stopAll
  * @property {DisposeAudio} dispose
  * @property {SubscribeVoiceEnd} subscribeVoiceEnd
+ * @property {function(): ReadonlyArray<VoiceHandle>} getActiveVoices FIFO snapshot; excludes release tails.
  */
 
 /**
