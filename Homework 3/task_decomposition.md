@@ -148,7 +148,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 05 — Responsive drop cards
 
-- [ ] Implement and verify.
+- [x] Implement and verify (build and existing tests pass; Edge checks cover 375px, desktop columns, skip-link keyboard/focus and clock-driven phase transitions).
 
 **Scope:** Render title, VND price, confirmed/pending stock presentation, opening/expiry countdown, phase, and native claim button. Prepare a disabled placeholder until claim flow is connected.
 

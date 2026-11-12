@@ -30,9 +30,17 @@ an aggregate of the independent feed fixture. All inventory and prices are
 simulated. No external API, credentials, backend or payment integration is used.
 
 `npm test` uses Node's built-in runner to verify fixture validity, reset timing,
-determinism and invalid-data rejection. No lint script exists. Countdown,
-claim service, interactive standings and virtual feed are pending. Browser
-accessibility and 375px layout are not verified.
+determinism and invalid-data rejection. No lint script exists. Claim service,
+interactive standings and virtual feed are pending. Full browser accessibility
+verification remains pending; limited card checks are recorded below.
+
+Drop cards now connect the timer to semantic articles and definition lists,
+showing VND prices, confirmed demo stock, phase text and an opening or expiry
+countdown. Claim buttons are natively disabled until claim integration exists;
+countdown updates are outside live regions. Cards reflow to one column on mobile
+and two on wider screens. Edge checks verified no page overflow at 375px,
+desktop columns, skip-link Tab/Enter focus and warmup/live/expired transitions.
+This is limited verification, not a complete accessibility or Lighthouse audit.
 
 ## Timer and phase utilities
 
@@ -41,7 +49,7 @@ accessibility and 375px layout are not verified.
 every 250ms, immediately on input changes and when the document becomes visible.
 Cleanup removes the interval/listener. Invalid inputs return null times and
 readable error text. It continues refreshing after zero so a caller can derive
-both opening and expiry from `nowEpochMs`; the upcoming card UI will connect it.
+both opening and expiry from `nowEpochMs`; DropCard uses that shared clock.
 Timestamp arithmetic avoids accumulated callback drift but still depends on
 the device clock and configured offset.
 

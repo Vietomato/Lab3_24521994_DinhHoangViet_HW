@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { createDrops, DEMO_NOTICE, standings, killEvents } from './data/fixtures.js';
 import { validateFixtures } from './lib/validateFixtures.js';
-
-const priceFormatter = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+import DropCard from './components/DropCard.jsx';
 
 export default function App() {
   const [drops] = useState(() => createDrops(Date.now()));
@@ -23,15 +22,13 @@ export default function App() {
         </p>
         <section aria-labelledby="drops-heading">
           <h2 id="drops-heading">Airdrop vé &amp; G-Coin</h2>
-          <p>Khu vực airdrop đang được chuẩn bị. Chức năng nhận vật phẩm chưa được kết nối.</p>
+          <p>Thời gian và kho bên dưới thuộc phiên mô phỏng này. Chức năng nhận vật phẩm chưa được kết nối.</p>
           {errors.length > 0 ? (
             <p role="status">Dữ liệu demo không hợp lệ: {errors.join(' ')}</p>
           ) : (
-            <ul>
-              {drops.map((drop) => (
-                <li key={drop.id}>{drop.title} · {priceFormatter.format(drop.priceVnd)} · Kho mô phỏng: {drop.remainingStock}</li>
-              ))}
-            </ul>
+            <div className="airdrop-grid">
+              {drops.map((drop) => <DropCard key={drop.id} drop={drop} />)}
+            </div>
           )}
         </section>
         <section aria-labelledby="standings-heading">

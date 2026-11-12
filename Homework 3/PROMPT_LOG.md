@@ -213,3 +213,53 @@ Actual verification:
 - NOT VERIFIED: real-browser visibility/throttling, rendered countdown UI and accessibility. jsdom dispatches controlled visibility events; it does not emulate actual background-tab scheduling. No lint script exists.
 - User explicitly authorized commit. Relevant changes are reviewed/staged without dependencies, cache or dist.
 - Commit reference: the commit containing this entry, titled `feat: implement timestamp countdown and drop phases`; hash obtained from Git history after creation.
+
+## 2026-11-12 — Responsive airdrop cards
+
+Exact prompt received (literal escapes retained):
+
+```text
+Build DropCard and the airdrop section using existing data and timer utilities.\
+\
+Display:\
+\- Drop title.\
+\- VND price formatted through Intl.NumberFormat('vi-VN').\
+\- Stock.\
+\- Current phase.\
+\- Opening countdown before launch and expiry countdown afterward.\
+\- A native claim button.\
+\
+Requirements:\
+\- Use semantic article, heading, and definition-list elements where appropriate.\
+\- Provide clear text for every phase.\
+\- Keep claim buttons disabled until claim integration is implemented.\
+\- Do not announce countdown ticks through an aria-live region.\
+\- Provide visible focus and readable contrast.\
+\- Do not communicate phase through color alone.\
+\- At 375px, cards and controls must fit without page-level horizontal overflow.\
+\
+Run the production build. Inspect keyboard navigation and responsive layout if browser tools are available; otherwise mark those checks as pending.\
+\
+Update PROMPT_LOG.md and commit:\
+feat: build responsive airdrop cards
+```
+
+Work performed:
+
+- Reviewed rules, existing App/CSS, timer and pure utilities. Initial Git status clean.
+- Added DropCard with article/h3/dl, useId associations, vi-VN VND prices, confirmed stock, text for all four phases, and opening-versus-expiry countdown from one hook clock sample. Invalid data displays an inline error; all claim buttons remain natively disabled with explanatory text.
+- Connected cards to App's existing fixtures and added mobile-first grid, wrapping, readable dark-theme text and controls. Countdown is not a live region. Existing visible focus/skip link retained; no animation introduced.
+- Updated task progress and README. No claim behavior implemented.
+
+Files changed: src/components/DropCard.jsx, src/App.jsx, src/index.css, task_decomposition.md, README.md, PROMPT_LOG.md.
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 13/13 existing pure/fixture/hook-jsdom tests. These do not independently test DropCard rendering.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 21 transformed modules, exit 0; timer/card now included in application.
+- PASS: headless Edge via existing Homework 2 Playwright installation against Homework 3 Vite server on localhost:5177. At 375x812, document scrollWidth <= innerWidth and all card/button bounds within viewport. At 1280x800, cards occupy two columns.
+- PASS: real browser Tab focused visible skip link (3px outline); Enter moved focus to main. Both claim controls were native disabled buttons. No card aria-live/status regions and no pageerror events.
+- PASS: controlled browser clock advanced 31 seconds then another 330 seconds: initial live/upcoming fixtures transitioned to live and then both expired. Phase attributes were asserted; text for each phase/deadline reviewed in source. LOOTED_OUT and invalid-data card rendering were not exercised in the browser during this check.
+- Tooling correction: first browser-check script passed through PowerShell stdin lost Vietnamese regex encoding and failed to parse before launching. Repeated using ASCII phase-attribute assertions; all checks passed. No application defect observed from that tooling issue.
+- NOT VERIFIED: full WCAG audit, Lighthouse score, screen-reader output, all keyboard paths and other browser engines. No lint script exists.
+- Commit explicitly authorized. Relevant working/staged diffs checked; generated files excluded. Commit reference: commit containing this entry, titled `feat: build responsive airdrop cards`.

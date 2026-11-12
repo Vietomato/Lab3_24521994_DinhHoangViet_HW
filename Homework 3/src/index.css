@@ -23,3 +23,20 @@ a { color: #ffd166; }
 :focus-visible { outline: 3px solid #ffd166; outline-offset: 4px; }
 .skip-link { position: absolute; top: 0.5rem; left: 1rem; padding: 0.75rem; background: #111820; transform: translateY(-200%); z-index: 1; }
 .skip-link:focus { transform: translateY(0); }
+
+.airdrop-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.drop-card { min-width: 0; padding: 1.25rem; border: 1px solid #65768c; border-radius: 0.5rem; background: #111820; }
+.drop-card h3 { margin-top: 0; font-size: 1.2rem; line-height: 1.4; overflow-wrap: anywhere; }
+.phase-label { color: #ffd166; font-weight: 700; }
+.drop-details { margin-block: 1.25rem; }
+.drop-details > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 1rem; padding-block: 0.5rem; border-bottom: 1px solid #526176; }
+.drop-details dt { color: #c4cfdd; }
+.drop-details dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+.countdown { font-variant-numeric: tabular-nums; }
+.claim-help { color: #c4cfdd; }
+.card-error { color: #ffb4b4; }
+.drop-card button { width: 100%; min-height: 44px; padding: 0.75rem; border: 1px solid #65768c; border-radius: 0.3rem; font: inherit; white-space: normal; overflow-wrap: anywhere; }
+.drop-card button:disabled { opacity: 1; background: #283646; color: #d4dfed; cursor: not-allowed; }
+@media (min-width: 760px) {
+  .airdrop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
