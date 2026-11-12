@@ -134,7 +134,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 04 — Timestamp countdown and phase logic
 
-- [ ] Implement and verify.
+- [x] Implement and verify (pure tests plus React hook/jsdom checks pass; actual browser background-tab behavior remains unverified).
 
 **Scope:** Implement usePubgAirdropTimer with offset, clock recalculation, visibility wake-up, invalid input handling, and cleanup. Add pure phase and time-format helpers.
 

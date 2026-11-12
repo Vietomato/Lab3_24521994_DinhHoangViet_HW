@@ -163,3 +163,53 @@ Verification:
 - NOT VERIFIED: actual browser rendering, accessibility, 375px layout and reset interaction. Pure fixture tests do not verify rendered behavior. No lint script exists.
 - Commit authorized explicitly by this prompt. Review working/staged diffs and exclude generated files before committing.
 - Commit reference: commit containing this entry, titled `feat: add deterministic arena demo data`; obtain hash from Git history after creation.
+
+## 2026-11-12 — Timestamp countdown and drop phases
+
+Exact prompt received (literal escapes retained):
+
+```text
+Implement usePubgAirdropTimer(targetEpochMs, serverOffsetMs = 0) and pure drop utilities.\
+\
+Requirements:\
+\- Calculate remaining time using:\
+&#x20; Math.max(0, targetEpochMs - (Date.now() + serverOffsetMs)).\
+\- Never implement countdown by decrementing previous seconds.\
+\- Recalculate immediately when target or offset changes.\
+\- Resynchronize when the document becomes visible.\
+\- Clean up the update timer and visibilitychange listener.\
+\- Handle invalid timestamps safely.\
+\
+Derive phases using current time and confirmed stock:\
+1\. EXPIRED when now >= expiresEpochMs.\
+2\. WARMUP when now < dropEpochMs.\
+3\. LOOTED_OUT when confirmed stock is zero.\
+4\. AIRDROP_LIVE otherwise.\
+\
+Keep opening and expiry separate. Expose enough current-time information for the interface to calculate both correctly.\
+\
+Add focused tests for phase boundaries, invalid input, delayed callbacks, offset changes, visibility resynchronization, and cleanup using suitable existing tools. Distinguish pure-function checks from hook/browser checks.\
+\
+Update PROMPT_LOG.md, run relevant checks and the production build, and commit:\
+feat: implement timestamp countdown and drop phases
+```
+
+Work performed:
+
+- Reviewed project rules, contracts, Task 04 and current test infrastructure. Initial working tree clean; no workspace AGENTS.md found.
+- Added pure drop.js functions for validated timestamps, clock snapshots, phase precedence with explicit confirmed stock and time formatting. Invalid phase input returns null rather than an eligible phase.
+- Added usePubgAirdropTimer: clock-based refresh every 250ms, fresh values on first changed-input render, effect resync, visible-document resync and cleanup. Returns nowEpochMs alongside remainingMs/error to keep opening and expiry separate. Clock continues after remainingMs reaches zero.
+- Used existing Node test runner and react-dom; added jsdom as a dev-only dependency to mount and test the real hook without a browser. No deprecated React test renderer used.
+- Updated README and Task 04 status. Hook is ready for the next drop-card UI; not yet imported into App, so production bundle does not exercise it.
+
+Files changed: src/lib/drop.js, src/hooks/usePubgAirdropTimer.js, tests/drop.test.js, tests/timer-hook.test.js, package.json, package-lock.json, README.md, task_decomposition.md and PROMPT_LOG.md.
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 13 tests, 13 passed, 0 failed. Eight existing fixture tests, four pure drop-utility tests, one React hook/jsdom integration test with multiple lifecycle assertions.
+- Pure checks cover before/at opening and expiry, phase precedence for zero stock, invalid timing/stock, delayed clock snapshots, offsets, clamping and duration formatting.
+- Hook/jsdom check uses controlled Date.now and captured interval callbacks (no real waits): delayed callback, immediate target/offset and offset-only changes, hidden/visible events, invalid target recovery, continuing clock after zero, StrictMode single-resource ownership and unmount cleanup.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 18 modules transformed, exit 0.
+- NOT VERIFIED: real-browser visibility/throttling, rendered countdown UI and accessibility. jsdom dispatches controlled visibility events; it does not emulate actual background-tab scheduling. No lint script exists.
+- User explicitly authorized commit. Relevant changes are reviewed/staged without dependencies, cache or dist.
+- Commit reference: the commit containing this entry, titled `feat: implement timestamp countdown and drop phases`; hash obtained from Git history after creation.

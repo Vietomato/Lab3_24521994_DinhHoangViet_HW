@@ -34,5 +34,27 @@ determinism and invalid-data rejection. No lint script exists. Countdown,
 claim service, interactive standings and virtual feed are pending. Browser
 accessibility and 375px layout are not verified.
 
+## Timer and phase utilities
+
+`usePubgAirdropTimer(targetEpochMs, serverOffsetMs = 0)` returns
+`{ nowEpochMs, remainingMs, error }`. It recalculates from `Date.now() + offset`
+every 250ms, immediately on input changes and when the document becomes visible.
+Cleanup removes the interval/listener. Invalid inputs return null times and
+readable error text. It continues refreshing after zero so a caller can derive
+both opening and expiry from `nowEpochMs`; the upcoming card UI will connect it.
+Timestamp arithmetic avoids accumulated callback drift but still depends on
+the device clock and configured offset.
+
+`getDropPhase(drop, nowEpochMs, confirmedStock)` returns EXPIRED at expiry,
+otherwise WARMUP before opening, otherwise LOOTED_OUT at zero confirmed stock,
+otherwise AIRDROP_LIVE. Invalid timing/stock returns null, which callers must
+display as an error with claiming disabled. Optimistic stock is not phase input.
+`formatRemainingTime` formats a duration separately from phase determination.
+
+Tests distinguish pure utilities from an actual React hook mounted with
+react-dom in jsdom. The latter controls Date.now, timer callbacks and visibility
+to verify delayed refresh, prop changes, StrictMode and cleanup; it is not a
+real-browser background-tab or accessibility check.
+
 `src/contracts.js` holds JSDoc contracts. Feature folders are `components/`,
 `hooks/`, `api/`, `data/` (fixtures), and `lib/` (pure utilities).
