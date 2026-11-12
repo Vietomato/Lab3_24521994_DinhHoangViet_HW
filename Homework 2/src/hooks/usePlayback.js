@@ -17,18 +17,21 @@ export function usePlayback({ initialize, noteOn, noteOff, waitForVoice, events,
     };
   }, [initialize, noteOn, noteOff, waitForVoice, refreshPressed]);
 
-  const play = useCallback(async () => {
+  const playEvents = useCallback(async (sequence) => {
     const queue = queueRef.current;
     if (!queue || !beginPlayback()) return;
     const owner = {};
     ownerRef.current = owner;
     clearHeld(); setError(null);
-    try { await queue.play(events, speed); }
+    try { await queue.play(sequence, speed); }
     catch (cause) { if (ownerRef.current === owner) setError(cause.message); }
     finally {
       if (ownerRef.current === owner) { ownerRef.current = null; endPlayback(); }
     }
-  }, [beginPlayback, clearHeld, endPlayback, events, speed]);
+  }, [beginPlayback, clearHeld, endPlayback, speed]);
 
-  return { play, speed, setSpeed, error };
+  const play = useCallback(() => playEvents(events), [events, playEvents]);
+  const stop = useCallback(() => { void queueRef.current?.stop().catch(cause => setError(cause.message)); }, []);
+
+  return { play, playEvents, stop, speed, setSpeed, error };
 }

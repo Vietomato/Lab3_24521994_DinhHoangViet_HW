@@ -565,3 +565,33 @@ revert r á
 Đã xác nhận revert xong ở commit `2a6e1dc`. Tôi đã khôi phục phần tối ưu dưới dạng **chưa commit** để tiếp tục review và cập nhật prompt log.
 
 Kiểm tra lại: **16 unit test, 12 browser test và build đều qua**. Không tạo commit hay push.
+
+## Built-in Beethoven demo
+
+Actual user prompt:
+
+```text
+đánh bài bettoven virus, m cài thêm cái tự động chs bài đó khi t bấm play đi
+```
+
+- Added a separate Play Beethoven Virus / Stop section using the existing shared transport and synthesized piano. Does not overwrite recorded events.
+- Imported the public-domain Mutopia Pathétique III MIDI (Chris Sawer), retaining source/license and deterministic converter. Generated 2,385 immutable note events; source duration about 232.9 seconds. This is the original classical piano movement, not an exact modern remix.
+- Added midi-file as a dev-only conversion dependency. Playback uses a static local fixture with no runtime external service.
+- PASS: npm.cmd test — 33 passed, 0 failed; npm.cmd run build passed.
+- PASS: targeted beethoven.spec.js on Edge at localhost:5176 checks play without recording, key illumination, mutual exclusion, stop, restart and no page errors.
+- Human listening/full-song performance remains unverified. No commit or push requested.
+- PASS: existing playback.spec.js regression also passed on Edge: recorded chord at all speeds, transport guards and recording preservation.
+
+## Publish Beethoven feature
+
+Exact user prompt:
+
+```text
+commit lên github phần Homework 2 đi
+```
+
+- User authorized committing and pushing the Homework 2 Beethoven feature.
+- Reviewed status/diffs and the current origin/Homework-2. Used an isolated checkout based on the remote branch to avoid adding newer Homework 3 commits or modifying unrelated working files.
+- Existing verification: 33 unit tests, production build and Beethoven/recorded-playback Edge tests passed.
+- Included only Homework 2 code, score/source attribution, converter, tests, README, package files and this log. Excluded root failure audit and Homework 3 changes.
+- Commit reference: feat: add Beethoven piano autoplay and stop controls. Publication result is reported after Git confirms it.
