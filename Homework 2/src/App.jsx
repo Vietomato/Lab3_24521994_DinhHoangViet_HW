@@ -4,6 +4,7 @@ import { usePianoInput } from './hooks/usePianoInput.js';
 import { useRecorder } from './hooks/useRecorder.js';
 import TransportControls from './components/TransportControls.jsx';
 import { usePlayback } from './hooks/usePlayback.js';
+import { beethovenSequence } from './music/beethoven.js';
 
 /** Live piano, immutable FIFO recording and mutually exclusive replay. */
 export default function App() {
@@ -22,6 +23,15 @@ export default function App() {
         <p>A space to play and explore.</p>
       </header>
       <main id="main-content" tabIndex={-1}>
+        <section aria-labelledby="demo-heading">
+          <h2 id="demo-heading">Beethoven Virus — Piano Demo</h2>
+          <p>Automatically play Beethoven’s Pathétique, movement III: the original piano theme behind Beethoven Virus. This is the classical score, not the commercial remix.</p>
+          <div className="transport-actions">
+            <button type="button" disabled={recording.state !== 'idle'} onClick={() => playback.playEvents(beethovenSequence)}>Play Beethoven Virus</button>
+            <button type="button" disabled={recording.state !== 'playing'} onClick={playback.stop}>Stop</button>
+          </div>
+          <p>Uses Replay speed below. Your recorded notes are preserved. Keys light up during playback.</p>
+        </section>
         <TransportControls state={recording.state} events={recording.events} error={recording.error || playback.error}
           onRecord={() => { input.clearHeld(); recording.startRecording(); }}
           onStopRecording={() => { recording.stopRecording(); input.clearHeld(); }}
