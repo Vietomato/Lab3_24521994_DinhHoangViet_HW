@@ -115,3 +115,51 @@ chore: initialize React arena application
 - Verification: production build passed in the preceding implementation; reviewed Git status, working diff/check and staged content before commit. Generated dependencies, cache and dist remain ignored.
 - Browser checks remain pending; no unrelated files included.
 - Commit reference: the commit containing this entry, titled `chore: initialize React arena application`; hash available in Git history.
+
+## 2026-11-12 — Deterministic arena demo data
+
+Exact prompt received (literal backslashes retained):
+
+```text
+Read project.rules and the current contracts.\
+\
+Create deterministic demo data for:\
+\- A PVS Finals VIP ticket drop.\
+\- A G-Coin crate drop.\
+\- The Expendables, Cerberus Esports, Roy Esports, and AGG standings.\
+\- At least 1,000 kill-feed events with stable unique IDs.\
+\
+Requirements:\
+\- Use createDrops(now) so resetting the demo creates fresh opening and expiry timestamps.\
+\- Include one initially live drop and one opening shortly afterward.\
+\- Use nonnegative integer stock and valid prices.\
+\- Generate the kill feed programmatically without random IDs during rendering.\
+\- Validate unique IDs, timestamps, and fixture consistency.\
+\- Clearly label all data as simulated and avoid claiming official affiliation.\
+\- No external API, API key, backend, or payment integration is required.\
+\
+Add a visible demo notice to the application.\
+\
+Update PROMPT_LOG.md, run relevant checks and the production build, and commit:\
+feat: add deterministic arena demo data\
+\
+Report the actual verification results and commit hash.
+```
+
+Work performed:
+
+- Read project.rules.md and current JSDoc contracts; initial Git status was clean. No workspace AGENTS.md found.
+- Added src/data/fixtures.js: two independent fresh-timestamp drops from createDrops(now), four required demo squads and 1,200 generated immutable feed records with deterministic unique IDs. VIP opens 5 seconds before the supplied clock and expires 5 minutes after; crate opens 30 seconds after and expires 6 minutes after.
+- Added pure validateFixtures with inline-safe error strings for malformed records, duplicate/empty IDs, invalid numbers, expiry order and unknown squad references. UI renders validation errors instead of drop summaries if fixtures are invalid; no claim button exists yet.
+- Reused and strengthened the visible demo notice, connected simple fixture summaries and formatted VND prices. No full feed rendering or feature implementation introduced.
+- Added eight Node test cases, npm test script and documentation. Standings and feed are independent simulated fixtures, not an aggregate of each other. Reset UI/service remains future work.
+
+Files changed: src/data/fixtures.js, src/lib/validateFixtures.js, src/App.jsx, tests/data.test.js, package.json, README.md, task_decomposition.md and PROMPT_LOG.md.
+
+Verification:
+
+- PASS: `npm.cmd test` — 8 tests, 8 passed, 0 failed. Covers required teams/1,200 unique events, repeatability across module evaluations, fresh reset timestamps/stock isolation, initial live/upcoming timing, invalid clocks, duplicate/empty IDs, invalid prices/stock/deadlines and broken fixture references.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 18 transformed modules, exit 0.
+- NOT VERIFIED: actual browser rendering, accessibility, 375px layout and reset interaction. Pure fixture tests do not verify rendered behavior. No lint script exists.
+- Commit authorized explicitly by this prompt. Review working/staged diffs and exclude generated files before committing.
+- Commit reference: commit containing this entry, titled `feat: add deterministic arena demo data`; obtain hash from Git history after creation.

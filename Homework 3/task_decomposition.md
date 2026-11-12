@@ -120,7 +120,7 @@ Adapt locations to the existing project; do not recreate a working application u
 
 - [ ] Implement and verify.
 
-Progress (2026-11-12): React/Vite shell, semantic regions, feature folders and production build are ready. Deterministic fixtures and development-server/browser verification remain pending; this task is not complete.
+Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: two fresh-timestamp drops, four squads and 1,200 stable-ID kill events. Eight fixture tests and production build pass. Development-server/browser verification remains pending; this task is not yet fully verified.
 
 **Scope:** Prepare React 19 and Vite using the existing package manager. Add semantic page regions, two demo drops, four squads, a large stable-ID feed fixture, and explicit demo labeling.
 
