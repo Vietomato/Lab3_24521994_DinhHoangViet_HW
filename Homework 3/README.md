@@ -31,12 +31,12 @@ simulated. No external API, credentials, backend or payment integration is used.
 
 `npm test` uses Node's built-in runner to verify fixture validity, reset timing,
 determinism and invalid-data rejection. No lint script exists. Claim service,
-UI integration, interactive standings and virtual feed are pending. Full browser accessibility
+interactive standings and virtual feed are pending. Full browser accessibility
 verification remains pending; limited card checks are recorded below.
 
 Drop cards now connect the timer to semantic articles and definition lists,
 showing VND prices, confirmed demo stock, phase text and an opening or expiry
-countdown. Claim buttons are natively disabled until claim integration exists;
+countdown. Claim buttons are enabled only for eligible live drops without a pending claim;
 countdown updates are outside live regions. Cards reflow to one column on mobile
 and two on wider screens. Edge checks verified no page overflow at 375px,
 desktop columns, skip-link Tab/Enter focus and warmup/live/expired transitions.
@@ -93,6 +93,27 @@ inventory protection or real transactions.
 
 `createDemoSession(now, options)` creates fresh timestamps, stock and service
 together. Future reset UI must abort old requests and remount old card sessions;
-the helper does not cancel existing sessions automatically. Claim UI integration
-is pending, so buttons remain disabled. Node service tests use controlled clocks,
+the helper does not cancel existing sessions automatically. App's reset now
+creates a new session and remounts cards, whose cleanup aborts old operations.
+Node service tests use controlled clocks,
 captured timer callbacks and listener tracking, not real HTTP/browser tests.
+
+## Optimistic claims
+
+Choose Success, 409 Conflict or Network error in the labeled demo selector.
+Each eligible claim synchronously locks its drop, rechecks the current clock,
+creates a unique claim ID/AbortController and temporarily displays
+`Math.max(0, serverStock - (pending ? 1 : 0))`. Confirmed stock stays separate;
+speculative zero is not a confirmed sellout. Success applies authoritative stock,
+409 applies authoritative error stock if valid, and other errors only remove
+the pending deduction. No stale object snapshot is restored.
+
+Request/session identity guards responses and finally blocks. Unmount/reset
+aborts old operations and stale responses cannot clear a fresh session's lock.
+Always remount a card when replacing its drop/session; App uses session-version
+keys. Pending/success/error text is politely announced separately from countdown.
+
+`npm test` includes seven claim hook/jsdom tests. Headless Edge checks cover
+pending/success, network retry, keyboard Space, conflict sellout and reset while
+pending at 375px. AI_FAILURE_AUDIT.md records the actual defect shortfall rather
+than treating intentional simulated errors as defects.

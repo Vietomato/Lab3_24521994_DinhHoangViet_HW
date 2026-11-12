@@ -37,6 +37,11 @@ a { color: #ffd166; }
 .card-error { color: #ffb4b4; }
 .drop-card button { width: 100%; min-height: 44px; padding: 0.75rem; border: 1px solid #65768c; border-radius: 0.3rem; font: inherit; white-space: normal; overflow-wrap: anywhere; }
 .drop-card button:disabled { opacity: 1; background: #283646; color: #d4dfed; cursor: not-allowed; }
+.drop-card button:enabled, .demo-controls button { background: #ffd166; color: #111820; cursor: pointer; }
+.demo-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-block: 1rem; }
+.demo-controls select, .demo-controls button { min-width: 0; max-width: 100%; min-height: 44px; padding: 0.65rem; font: inherit; border-radius: 0.3rem; border: 1px solid #65768c; }
+.demo-controls button { white-space: normal; overflow-wrap: anywhere; }
+.claim-feedback { min-height: 1.6em; }
 @media (min-width: 760px) {
   .airdrop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

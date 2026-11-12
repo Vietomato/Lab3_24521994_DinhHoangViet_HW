@@ -176,7 +176,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 07 — Locked optimistic claiming
 
-- [ ] Implement and verify.
+- [x] Implement and verify (hook/jsdom and Edge pending/success checks pass).
 
 **Scope:** Implement useClaim with immediate per-drop ref lock, unique operation ID, AbortController, separate confirmed stock/pending deduction, success reconciliation, and accessible status.
 
@@ -190,7 +190,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 08 — Rollback and obsolete response protection
 
-- [ ] Implement and verify.
+- [x] Implement and verify (409/network/expiry, StrictMode, reset cancellation and obsolete response ownership tests pass; completed with Task 07 in the user's combined prompt).
 
 **Scope:** Handle 409 with authoritative stock, network failure with removal of pending deduction, and ownership-safe cleanup. Abort old sessions on reset/unmount. Implement explicit expiry completion policy.
 

@@ -355,3 +355,53 @@ Actual verification:
 - NOT VERIFIED: service integration with React claiming/reset, real HTTP behavior or browser inventory concurrency; no production inventory claim made. No lint script exists.
 - Reviewed working/staged diffs before commit. No push or further branch-history changes authorized/performed.
 - Commit reference: commit containing this entry, titled `feat: add abortable idempotent mock claim service`; actual hash reported after creation.
+
+## 2026-11-12 — Optimistic claims and conflict reconciliation
+
+Exact prompt received (literal escapes retained):
+
+```text
+Implement useClaim and connect DropCard to the mock service.\
+\
+Requirements:\
+\- Acquire an immediate per-drop ref lock before setting state or awaiting.\
+\- Recheck current eligibility inside the click handler.\
+\- Keep confirmed serverStock separate from the pending optimistic deduction.\
+\- Calculate displayed stock as:\
+&#x20; Math.max(0, serverStock - (pending ? 1 : 0)).\
+\- Use unique claim IDs and an AbortController.\
+\- Disable duplicate claims while pending.\
+\- On success, reconcile authoritative stock.\
+\- On 409, remove the pending deduction and apply authoritative error stock when available.\
+\- On other failures, remove only the pending deduction.\
+\- Never restore a stale whole-object snapshot.\
+\- Never display negative stock.\
+\- Do not treat speculative zero stock as confirmed LOOTED_OUT.\
+\- Guard responses and finally blocks using request/session ownership.\
+\- Abort requests on unmount and prevent obsolete state updates.\
+\- Provide accessible pending, success, and error feedback.\
+\
+Test rapid double clicks, success, final-item success, 409 rollback, network failure/retry, and expiry while pending.\
+\
+Update PROMPT_LOG.md and record actual discovered defects in AI_FAILURE_AUDIT.md. Run relevant checks and the build, then commit:\
+feat: implement optimistic claims and conflict reconciliation
+```
+
+Work performed:
+
+- Reviewed existing service, timer, cards and rules; started clean on Homework-3.
+- Added useClaim with synchronous ref lock, fresh eligibility validation, unique UUID/controller, separate confirmed stock/pending deduction, authoritative success/409 handling and ownership-safe finally/cleanup. Invalid responses cannot replace confirmed stock.
+- Connected App's isolated service and card eligibility, optimistic stock and polite transport status. Countdown remains outside the live region. Added labeled scenario selector and reset button; session-version keys remount cards and abort old claims.
+- Added seven hook integration tests using React StrictMode, jsdom, controlled Date.now and captured service timers. Updated README and task statuses; the user's combined prompt completes Tasks 07–08 together.
+- Created AI_FAILURE_AUDIT.md: zero verified application defects discovered in this task, explicitly recording the shortfall from three rather than inventing defects or counting intentional mock errors.
+
+Files changed: src/hooks/useClaim.js, src/components/DropCard.jsx, src/App.jsx, src/index.css, tests/claim-hook.test.js, README.md, task_decomposition.md, AI_FAILURE_AUDIT.md and PROMPT_LOG.md.
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 32 tests, 32 passed, 0 failed (seven new hook tests plus 25 existing). Covers same-tick double clicks, last-item pending vs confirmed phase, success, 409, network/retry, expiry while pending, reset/unmount cancellation and stale success/finally unable to alter newer operation.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 23 modules transformed, exit 0; service/hook now included in production app.
+- PASS: headless Edge using existing sibling Playwright against local Vite server, viewport 375x812, controlled clock: pending disables button and displays 23 while confirmed stock starts at 24; success confirms 23; network error rolls back deduction; Space activates retry; conflict reconciles to zero/LOOTED_OUT; reset restores fresh 24; reset during pending stays 24 after old delay.
+- PASS: Edge found no page overflow, no countdown inside live/status region and no pageerror events. This is not a screen-reader or full accessibility audit.
+- NOT VERIFIED: full WCAG, Lighthouse, other browser engines, production HTTP rollback. No lint script exists.
+- Commit explicitly authorized; relevant working/staged diffs checked. No push. Commit reference: commit containing this entry, titled `feat: implement optimistic claims and conflict reconciliation`.

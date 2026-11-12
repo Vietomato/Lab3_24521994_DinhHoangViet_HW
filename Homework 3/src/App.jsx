@@ -1,10 +1,14 @@
-import { useState } from 'react';
-import { createDrops, DEMO_NOTICE, standings, killEvents } from './data/fixtures.js';
+import { useId, useState } from 'react';
+import { DEMO_NOTICE, standings, killEvents } from './data/fixtures.js';
+import { createDemoSession } from './api/mockApi.js';
 import { validateFixtures } from './lib/validateFixtures.js';
 import DropCard from './components/DropCard.jsx';
 
 export default function App() {
-  const [drops] = useState(() => createDrops(Date.now()));
+  const [session, setSession] = useState(() => ({ ...createDemoSession(), version: 0 }));
+  const [scenario, setScenario] = useState('success');
+  const scenarioId = useId();
+  const { drops, service } = session;
   const errors = validateFixtures({ drops, standings, killEvents });
   return (
     <>
@@ -22,12 +26,21 @@ export default function App() {
         </p>
         <section aria-labelledby="drops-heading">
           <h2 id="drops-heading">Airdrop vé &amp; G-Coin</h2>
-          <p>Thời gian và kho bên dưới thuộc phiên mô phỏng này. Chức năng nhận vật phẩm chưa được kết nối.</p>
+          <p>Thời gian và kho bên dưới thuộc phiên mô phỏng này. Tồn kho chỉ tồn tại trong trình duyệt này.</p>
+          <div className="demo-controls">
+            <label htmlFor={scenarioId}>Kịch bản nhận mô phỏng</label>
+            <select id={scenarioId} value={scenario} onChange={(event) => setScenario(event.target.value)}>
+              <option value="success">Success — Thành công</option>
+              <option value="conflict">409 Conflict — Tranh chấp kho</option>
+              <option value="network-error">Network error — Lỗi mạng</option>
+            </select>
+            <button type="button" onClick={() => setSession((current) => ({ ...createDemoSession(), version: current.version + 1 }))}>Đặt lại phiên demo</button>
+          </div>
           {errors.length > 0 ? (
             <p role="status">Dữ liệu demo không hợp lệ: {errors.join(' ')}</p>
           ) : (
             <div className="airdrop-grid">
-              {drops.map((drop) => <DropCard key={drop.id} drop={drop} />)}
+              {drops.map((drop) => <DropCard key={`${session.version}-${drop.id}`} drop={drop} service={service} scenario={scenario} />)}
             </div>
           )}
         </section>
