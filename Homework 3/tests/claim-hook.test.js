@@ -126,3 +126,41 @@ test('claim hook: obsolete success/finally cannot clear a newer request', async 
   assert.equal(h.value.serverStock, 2);
   await h.flush(); assert.equal(h.value.serverStock, 1);
 });
+
+test('claim hook: scenario is snapshotted at request start, next request uses new selection', async (t) => {
+  const h = await harness(t);
+  await h.start();
+  await h.render({ scenario: 'conflict' });
+  await h.flush();
+  assert.equal(h.value.status, 'success');
+  assert.equal(h.value.serverStock, 1);
+  await h.start();
+  await h.render({ scenario: 'success' });
+  await h.flush();
+  assert.equal(h.value.status, 'error');
+  assert.equal(h.value.serverStock, 0);
+});
+
+for (const stage of ['idle', 'pending', 'success', 'conflict', 'expired']) {
+  test(`claim hook: StrictMode reset while ${stage} clears messages/stock/pending and refreshes deadlines`, async (t) => {
+    const h = await harness(t);
+    if (stage === 'conflict') await h.render({ scenario: 'conflict' });
+    if (['pending', 'success', 'conflict'].includes(stage)) await h.start();
+    if (['success', 'conflict'].includes(stage)) await h.flush();
+    h.advance(stage === 'expired' ? 400_000 : 5_000);
+    const freshDrop = createDrops(Date.now())[0];
+    const freshService = createMockClaimService([freshDrop]);
+    await h.render({ drop: freshDrop, service: freshService, scenario: 'success' }, true);
+    assert.equal(h.value.pending, false);
+    assert.equal(h.value.status, 'idle');
+    assert.equal(h.value.message, '');
+    assert.equal(h.value.serverStock, 24);
+    assert.equal(h.timers.size, 0);
+    assert.ok(freshDrop.dropEpochMs > h.drop.dropEpochMs);
+    assert.ok(freshDrop.expiresEpochMs > h.drop.expiresEpochMs);
+    assert.equal(getDropPhase(freshDrop, Date.now()), 'AIRDROP_LIVE');
+    await h.start(); await h.flush();
+    assert.equal(h.value.serverStock, 23);
+    assert.equal(h.value.status, 'success');
+  });
+}

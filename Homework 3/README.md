@@ -117,3 +117,16 @@ keys. Pending/success/error text is politely announced separately from countdown
 pending/success, network retry, keyboard Space, conflict sellout and reset while
 pending at 375px. AI_FAILURE_AUDIT.md records the actual defect shortfall rather
 than treating intentional simulated errors as defects.
+
+DemoControls associates its selector label and explanatory text using useId.
+It explicitly explains that these controls simulate server outcomes. A request
+snapshots the scenario at start; changing selection affects only later claims.
+Reset Demo retains the selected scenario, creates fresh drops/service together,
+advances session-version keys, clears old card status/pending and politely
+announces the new session. A scenario change alone does not remount cards.
+
+The reset handler creates the session before calling the state updater; the
+updater only combines it with the next version and remains pure under StrictMode.
+Reset tests cover idle, pending, success, conflict and expired sessions in both
+hook/jsdom checks and a headless Edge interaction check. Full screen-reader
+verification remains pending.

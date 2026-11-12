@@ -405,3 +405,46 @@ Actual verification:
 - PASS: Edge found no page overflow, no countdown inside live/status region and no pageerror events. This is not a screen-reader or full accessibility audit.
 - NOT VERIFIED: full WCAG, Lighthouse, other browser engines, production HTTP rollback. No lint script exists.
 - Commit explicitly authorized; relevant working/staged diffs checked. No push. Commit reference: commit containing this entry, titled `feat: implement optimistic claims and conflict reconciliation`.
+
+## 2026-11-12 — Scenario controls and safe demo reset
+
+Exact prompt received (literal escapes retained):
+
+```text
+Add accessible demo controls for claim scenarios and session reset.\
+\
+Requirements:\
+\- Provide a labeled selector for Success, 409 Conflict, and Network error.\
+\- Snapshot the selected scenario when each request starts.\
+\- Add Reset Demo.\
+\- Reset must create fresh drop timestamps, stock, and a new mock service together.\
+\- Abort or unmount old claim sessions.\
+\- Ensure old responses cannot modify the new session.\
+\- Clear old pending states and messages.\
+\- Use stable session identity and appropriate React keys.\
+\- Associate controls and labels using useId.\
+\- Clearly explain that the controls simulate server outcomes.\
+\
+Test resetting while idle, while pending, after success, after conflict, and after expiry. Check StrictMode lifecycle behavior.\
+\
+Update PROMPT_LOG.md, run relevant checks and the production build, and commit:\
+feat: add scenario controls and safe demo reset
+```
+
+Work performed:
+
+- Started clean on Homework-3. Reused existing service factory, session-version keys and ownership/abort cleanup rather than recreating them.
+- Extracted DemoControls with useId-associated label/help, three scenarios, explicit simulation/snapshot/reset explanation, Reset Demo button and polite reset confirmation. Reset keeps scenario selection while clearing card messages/pending through keyed remounts.
+- Explicitly stored the selected scenario on each operation before dispatch. Scenario changes affect only subsequent claims.
+- Moved fresh-session creation outside the state updater so the updater is pure during StrictMode checks.
+- Added six hook tests for scenario snapshot and reset idle/pending/success/conflict/expired. Existing obsolete-response and cleanup tests remain in force.
+
+Files changed: src/components/DemoControls.jsx, src/App.jsx, src/hooks/useClaim.js, tests/claim-hook.test.js, README.md and PROMPT_LOG.md.
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 38 tests, 38 passed, 0 failed. Six new checks use React StrictMode/jsdom with controlled time and timer callbacks; every reset verifies empty message, idle status, no pending/timers, fresh stock/deadlines and successful next claim.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 24 transformed modules, exit 0.
+- PASS: headless Edge via existing sibling Playwright, local Vite server, 375x812 and controlled clock: selector label/help association; selection changed during pending retains original success; next conflict uses new selection; reset idle/success/conflict/pending/expired clears card status and refreshes phases; Enter activates reset; no page overflow.
+- NOT VERIFIED: full screen-reader/WCAG audit, Lighthouse and other browser engines. No lint script exists.
+- User explicitly authorized commit; relevant diffs reviewed, generated files excluded. No push. Commit reference: the commit containing this entry, titled `feat: add scenario controls and safe demo reset`.

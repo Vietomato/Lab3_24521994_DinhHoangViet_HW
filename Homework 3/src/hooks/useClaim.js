@@ -29,13 +29,13 @@ export function useClaim({ drop, service, scenario = 'success', serverOffsetMs =
         validateFixtures({ drops: [drop], standings: [], killEvents: [] }).length ||
         getDropPhase(drop, now, state.serverStock) !== 'AIRDROP_LIVE') return;
 
-    const operation = { owner: session.current, controller: new AbortController() };
+    const operation = { owner: session.current, controller: new AbortController(), scenario };
     lock.current = operation; // Synchronous lock before state changes or awaits.
     const owns = () => session.current === operation.owner && lock.current === operation;
     setState((current) => ({ ...current, pending: true, status: 'pending', message: 'Đang xác nhận vật phẩm mô phỏng…' }));
     try {
       const claimId = crypto.randomUUID();
-      const result = await service.claim({ dropId: drop.id, claimId, scenario, signal: operation.controller.signal });
+      const result = await service.claim({ dropId: drop.id, claimId, scenario: operation.scenario, signal: operation.controller.signal });
       if (!owns()) return;
       if (result.claimId !== claimId || !stockValue(result.remainingStock)) throw new Error('Phản hồi kho không hợp lệ.');
       setState((current) => ({ ...current, serverStock: result.remainingStock, status: 'success', message: 'Đã nhận 1 vật phẩm mô phỏng. Không có giao dịch thật.' }));
