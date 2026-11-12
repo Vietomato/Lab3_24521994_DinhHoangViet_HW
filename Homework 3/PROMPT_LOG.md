@@ -263,3 +263,95 @@ Actual verification:
 - Tooling correction: first browser-check script passed through PowerShell stdin lost Vietnamese regex encoding and failed to parse before launching. Repeated using ASCII phase-attribute assertions; all checks passed. No application defect observed from that tooling issue.
 - NOT VERIFIED: full WCAG audit, Lighthouse score, screen-reader output, all keyboard paths and other browser engines. No lint script exists.
 - Commit explicitly authorized. Relevant working/staged diffs checked; generated files excluded. Commit reference: commit containing this entry, titled `feat: build responsive airdrop cards`.
+
+## 2026-11-12 — Branch organization
+
+Actual user messages received after the card commit:
+
+```text
+nãy g mình ch commit vào 1 folder riêng tên Homework 3 trên github
+```
+
+```text
+tôi muốn mình commit ra 1 folder Homework 3 riêng, đừng dính j tới các bài còn lại
+```
+
+Clarification answer received:
+
+```text
+Tạo branch Homework-3 trong repository hiện tại
+```
+
+- User chose a separate branch in the existing repository, rather than a new repository.
+- Initial working tree clean; only Homework-2 and master branches existed.
+- Created and switched to Homework-3 at a909a71, preserving all existing files and history. Homework-2 was not moved or rewritten; previous commits remain shared history.
+- This log update is left uncommitted for the next authorized commit. No push performed.
+
+### Separate prior Homework 3 commits from Homework-2
+
+Exact subsequent user messages:
+
+```text
+lịch sử trc đó từ lúc làm prompt đầu để làm project Homework 3 thì bạn đưa vào folder homework 3 đi
+```
+
+After clarification that this means removing Homework 3 commits from the local
+Homework-2 branch while keeping them on Homework-3, the user confirmed:
+
+```text
+đúng r
+```
+
+- Verified the first Homework 3 commit is 19bbab4 and its parent is 4a16fa4.
+- Moved only the local Homework-2 branch pointer back to 4a16fa4. Current branch Homework-3 retains all five Homework 3 commits through a909a71.
+- Working files and existing uncommitted log changes preserved. No remote push or remote history changes performed. This additional log entry remains uncommitted.
+
+## 2026-11-12 — Abortable idempotent mock claim service
+
+Exact prompt received (literal escapes retained):
+
+```text
+Implement an isolated in-browser mock claim service.\
+\
+Requirements:\
+\- Keep authoritative stock separate from React display state.\
+\- Support explicit Success, 409 Conflict, and Network error scenarios.\
+\- Use configurable latency with AbortSignal support.\
+\- Handle an already-aborted signal.\
+\- Remove timers and abort listeners on every settle path.\
+\- Validate the drop's opening time, expiry, and stock after the delay.\
+\- Perform final validation and stock mutation atomically without awaiting between them.\
+\- Return authoritative remainingStock on success.\
+\- Return authoritative stock on 409 when available.\
+\- Make repeated or concurrent successful requests with the same claimId and dropId deduct stock at most once.\
+\- Reject claimId reuse for a different drop.\
+\- Reject unknown drops and claims completed after expiry.\
+\- Provide a fresh service instance for each reset session.\
+\
+Document that abort before mutation cancels this mock operation, while aborting a real HTTP request would not guarantee server rollback.\
+\
+Test success, last-item contention, duplicate claim IDs, conflict, network failure, expiry during latency, and cancellation.\
+\
+Update PROMPT_LOG.md, run relevant checks and the build, and commit:\
+feat: add abortable idempotent mock claim service
+```
+
+Work performed:
+
+- Reviewed rules, contracts, drop utilities and Task 06. Current branch Homework-3; preserved prior uncommitted branch-organization log entries and included them in this authorized commit.
+- Added api/mockApi.js with private cloned inventory, request validation, configured latency, AbortSignal cancellation, centralized timer/listener cleanup, and synchronous post-delay eligibility/mutation/cache handling.
+- Added claim-ID/drop bindings and immutable successful result cache. Concurrent duplicates own separate cancellation; only the first successful completion deducts. Successful cached retries return original results even after expiry. Failed attempts may retry the same drop; different-drop reuse is rejected.
+- Added createDemoSession to generate fresh data/service together. Existing sessions are not reset in place. UI abort/remount and claim integration remain future work; disabled card buttons unchanged.
+- Added 12 Node service tests and README semantics; marked Task 06 complete. No observed application defect to audit in this task.
+
+Files changed: src/api/mockApi.js, tests/mockApi.test.js, README.md, task_decomposition.md and PROMPT_LOG.md (including prior branch-log updates).
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 25 tests passed, 0 failed (12 new service checks plus 13 existing checks).
+- New tests cover delayed success, detached stock, last-item contention, repeated/concurrent IDs, cross-drop ID rejection, explicit 409/network modes, retry, expiry at completion, opening at completion, unknown drops, already-aborted/mid-delay signals, independent duplicate cancellation, late abort, session isolation and invalid inputs/configuration.
+- Every service test checks no remaining mock timer and no tracked abort listener at teardown. Controlled Date.now/captured timer callbacks avoid real delays.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 21 transformed modules, exit 0. Service is not imported into the UI yet; tests exercise it directly.
+- NOT VERIFIED: service integration with React claiming/reset, real HTTP behavior or browser inventory concurrency; no production inventory claim made. No lint script exists.
+- Reviewed working/staged diffs before commit. No push or further branch-history changes authorized/performed.
+- Commit reference: commit containing this entry, titled `feat: add abortable idempotent mock claim service`; actual hash reported after creation.

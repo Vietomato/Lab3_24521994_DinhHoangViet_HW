@@ -162,7 +162,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 06 — Deterministic mock claim service
 
-- [ ] Implement and verify.
+- [x] Implement and verify (12 controlled-clock service tests pass, including timer/listener cleanup; UI integration remains Tasks 07–08).
 
 **Scope:** Implement per-session authoritative stock, abortable latency, explicit success/409/network-error modes, atomic final validation/deduction, and idempotency. Add reset/session support.
 
