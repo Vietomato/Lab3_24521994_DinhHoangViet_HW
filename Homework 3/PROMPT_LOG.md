@@ -448,3 +448,47 @@ Actual verification:
 - PASS: headless Edge via existing sibling Playwright, local Vite server, 375x812 and controlled clock: selector label/help association; selection changed during pending retains original success; next conflict uses new selection; reset idle/success/conflict/pending/expired clears card status and refreshes phases; Enter activates reset; no page overflow.
 - NOT VERIFIED: full screen-reader/WCAG audit, Lighthouse and other browser engines. No lint script exists.
 - User explicitly authorized commit; relevant diffs reviewed, generated files excluded. No push. Commit reference: the commit containing this entry, titled `feat: add scenario controls and safe demo reset`.
+
+## 2026-11-12 — Searchable and sortable squad leaderboard
+
+Exact prompt received (literal escapes retained):
+
+```text
+Implement the squad leaderboard and pure filtering/sorting utilities.\
+\
+Requirements:\
+\- Search squad names case-insensitively and trim search text.\
+\- Sort by wwcdCount, placementPts, or killPts.\
+\- Support ascending and descending order.\
+\- Use squadId as a deterministic tie-breaker.\
+\- Never mutate the original standings array.\
+\- Derive filtered and sorted results during rendering instead of synchronizing copies through useEffect.\
+\- Use a semantic table with appropriate headers.\
+\- Label search and sort controls using useId.\
+\- Provide an empty-result state.\
+\- Include a clearly labeled simulated standings update or manual refresh action.\
+\- If using a timer, clean it up.\
+\
+Test search, all metrics, both directions, ties, empty results, and source immutability.\
+\
+Update PROMPT_LOG.md, run relevant checks and the build, and commit:\
+feat: add searchable and sortable squad leaderboard
+```
+
+Work performed:
+
+- Started clean on Homework-3; reviewed App, fixtures, rules and Task 09.
+- Added pure selectStandings: trimmed case-insensitive search, three metrics, both directions, ascending squadId tie-breaker and nonmutating filtered-array sort. Added deterministic immutable scoring-round utility.
+- Added Leaderboard with render-derived rows, useId-labeled controls, semantic caption/table/row and column headers, aria-sort, empty row and focusable scroll wrapper.
+- Added explicitly simulated manual update button and polite round confirmation; no timer. App's session key resets leaderboard state with Reset Demo.
+- Added nine pure tests; updated README/task status. No verified application defect discovered in this task.
+
+Files changed: src/lib/leaderboard.js, src/components/Leaderboard.jsx, src/App.jsx, src/index.css, tests/leaderboard.test.js, README.md, task_decomposition.md and PROMPT_LOG.md.
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 47 tests, 47 passed, 0 failed. Nine new pure checks cover search/whitespace/empty results, every metric and direction, ties, frozen-source immutability, fixture ordering and deterministic simulated updates.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 26 transformed modules, exit 0.
+- PASS: headless Edge with existing sibling Playwright against local Vite server at 375x812: labels associated; mixed-case trimmed search finds Cerberus; unknown search yields spanning empty cell; killPts descending/ascending changes leaders; aria-sort follows direction; Space activates simulated update; no page-level horizontal overflow.
+- NOT VERIFIED: full screen-reader/WCAG audit, Lighthouse and other browsers. Pure selector tests do not verify DOM behavior; Edge checks are recorded separately. No lint script exists.
+- User explicitly authorized commit. Relevant diffs reviewed and generated files excluded. No push. Commit reference: commit containing this entry, titled `feat: add searchable and sortable squad leaderboard`.

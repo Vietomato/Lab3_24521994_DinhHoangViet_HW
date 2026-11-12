@@ -42,6 +42,18 @@ a { color: #ffd166; }
 .demo-controls select, .demo-controls button { min-width: 0; max-width: 100%; min-height: 44px; padding: 0.65rem; font: inherit; border-radius: 0.3rem; border: 1px solid #65768c; }
 .demo-controls button { white-space: normal; overflow-wrap: anywhere; }
 .claim-feedback { min-height: 1.6em; }
+.leaderboard-controls { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; margin-block: 1rem; }
+.leaderboard-controls > div { min-width: 0; flex: 1 1 12rem; }
+.leaderboard-controls label { display: block; margin-bottom: 0.25rem; }
+.leaderboard-controls input, .leaderboard-controls select, .leaderboard-controls button { min-width: 0; max-width: 100%; min-height: 44px; padding: 0.65rem; border: 1px solid #65768c; border-radius: 0.3rem; font: inherit; }
+.leaderboard-controls input, .leaderboard-controls select { width: 100%; }
+.leaderboard-controls button { background: #ffd166; color: #111820; white-space: normal; overflow-wrap: anywhere; cursor: pointer; }
+.table-scroll { max-width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+caption { text-align: left; padding-block: 0.75rem; }
+th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #65768c; }
+thead { background: #111820; }
+tbody th { font-weight: 500; }
 @media (min-width: 760px) {
   .airdrop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

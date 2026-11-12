@@ -31,7 +31,7 @@ simulated. No external API, credentials, backend or payment integration is used.
 
 `npm test` uses Node's built-in runner to verify fixture validity, reset timing,
 determinism and invalid-data rejection. No lint script exists. Claim service,
-interactive standings and virtual feed are pending. Full browser accessibility
+virtual feed is pending. Full browser accessibility
 verification remains pending; limited card checks are recorded below.
 
 Drop cards now connect the timer to semantic articles and definition lists,
@@ -130,3 +130,19 @@ updater only combines it with the next version and remains pure under StrictMode
 Reset tests cover idle, pending, success, conflict and expired sessions in both
 hook/jsdom checks and a headless Edge interaction check. Full screen-reader
 verification remains pending.
+
+## Squad leaderboard
+
+The leaderboard filters trimmed case-insensitive squad names and sorts WWCD,
+placement or kill points in either direction. Ties always use ascending squadId.
+The pure selector filters into a fresh array before sorting; fixtures remain
+unchanged. The component derives results during render, without effect-synced
+copies. Controls use useId labels; table has a caption, row/column headers,
+aria-sort, an empty-result row and a keyboard-focusable horizontal scroll region.
+
+“Cập nhật điểm mô phỏng” adds a deterministic fictional scoring round on demand,
+with immutable records and a polite confirmation. No update timer or external
+stream is used. Reset Demo also resets leaderboard scores/search/sort through
+the session key. Nine pure tests cover all metric/direction combinations, ties,
+search/empty results, immutability and deterministic updates. Edge checked the
+controls, keyboard refresh and 375px layout; a full accessibility audit is pending.

@@ -204,7 +204,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 09 — Leaderboard selectors and interface
 
-- [ ] Implement and verify.
+- [x] Implement and verify (nine pure tests plus Edge search/sort/refresh/375px checks pass; no update timer used).
 
 **Scope:** Build search, sort metric/direction controls, stable tie-breaker, and semantic standings table. Add clearly labeled manual or simulated standings updates if needed.
 
