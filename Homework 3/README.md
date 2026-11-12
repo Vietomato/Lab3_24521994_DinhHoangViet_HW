@@ -21,8 +21,8 @@ Current scope: semantic shell, demo notices and deterministic local fixtures.
 `createDrops(now)` creates a VIP ticket drop open since 5 seconds before `now`,
 expiring after 5 minutes, and a G-Coin crate opening after 30 seconds, expiring
 after 6 minutes. Each call returns fresh records and stock; identical inputs
-produce identical data. A future session reset must create data and service
-together; a reset UI is not implemented yet.
+produce identical data. Reset Demo creates fresh data and service together,
+remounts cards and aborts old claim sessions.
 
 Four squads have fictional points; 1,200 fictional kill events are generated
 once outside rendering with stable IDs. These points are sample standings, not
@@ -30,8 +30,7 @@ an aggregate of the independent feed fixture. All inventory and prices are
 simulated. No external API, credentials, backend or payment integration is used.
 
 `npm test` uses Node's built-in runner to verify fixture validity, reset timing,
-determinism and invalid-data rejection. No lint script exists. Claim service,
-Full browser accessibility
+determinism and invalid-data rejection. No lint script exists. Full browser accessibility
 verification remains pending; limited card checks are recorded below.
 
 Drop cards now connect the timer to semantic articles and definition lists,
@@ -92,7 +91,7 @@ removed on completion/cancellation. This simulation provides no cross-browser
 inventory protection or real transactions.
 
 `createDemoSession(now, options)` creates fresh timestamps, stock and service
-together. Future reset UI must abort old requests and remount old card sessions;
+together. Reset UI must abort old requests and remount old card sessions;
 the helper does not cancel existing sessions automatically. App's reset now
 creates a new session and remounts cards, whose cleanup aborts old operations.
 Node service tests use controlled clocks,
@@ -113,7 +112,7 @@ aborts old operations and stale responses cannot clear a fresh session's lock.
 Always remount a card when replacing its drop/session; App uses session-version
 keys. Pending/success/error text is politely announced separately from countdown.
 
-`npm test` includes seven claim hook/jsdom tests. Headless Edge checks cover
+`npm test` includes thirteen claim hook/jsdom tests. Headless Edge checks cover
 pending/success, network retry, keyboard Space, conflict sellout and reset while
 pending at 375px. AI_FAILURE_AUDIT.md records the actual defect shortfall rather
 than treating intentional simulated errors as defects.
@@ -167,3 +166,11 @@ data shows an empty message. Reset Demo remounts the feed too. Five pure tests
 cover boundaries, huge/fractional offsets, filters and empty lists. Edge checks
 verified first/last rows, bounded DOM, filter after scroll, 72px row geometry,
 PageDown, empty component rendering and 375px no page overflow.
+
+## Repeat production browser checks
+
+After `npm run build`, start `npm run preview -- --host 127.0.0.1 --port 4177`
+in one terminal, then run `npm run test:browser` in another. The script uses the
+project's Playwright dependency and installed Microsoft Edge. Override
+`TEST_BASE_URL` or `PLAYWRIGHT_CHANNEL` if needed. It uses controlled browser
+time, not long real waits. See VERIFICATION.md for measured results and limits.

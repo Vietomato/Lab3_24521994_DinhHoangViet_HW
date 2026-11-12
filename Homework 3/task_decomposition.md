@@ -104,7 +104,7 @@ Adapt locations to the existing project; do not recreate a working application u
 
 ## Task 02 — Domain contracts and task plan
 
-- [x] Implement and verify (Stage A contract/plan review; no commit created).
+- [x] Implement and verify (Stage A contract/plan review; committed as 19bbab4).
 
 **Scope:** Adopt this plan and define JSDoc contracts for drops, expiry, squads, kill events, claim requests/responses/errors. Document phase precedence, timing, idempotency, and ownership.
 
@@ -118,9 +118,9 @@ Adapt locations to the existing project; do not recreate a working application u
 
 ## Task 03 — Application shell and deterministic fixtures
 
-- [ ] Implement and verify.
+- [x] Implement and verify (see VERIFICATION.md for actual results and remaining manual checks).
 
-Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: two fresh-timestamp drops, four squads and 1,200 stable-ID kill events. Eight fixture tests and production build pass. Development-server/browser verification remains pending; this task is not yet fully verified.
+Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: two fresh-timestamp drops, four squads and 1,200 stable-ID kill events. Eight fixture tests and production build pass. Development and production browser checks have now passed; see VERIFICATION.md.
 
 **Scope:** Prepare React 19 and Vite using the existing package manager. Add semantic page regions, two demo drops, four squads, a large stable-ID feed fixture, and explicit demo labeling.
 
@@ -232,7 +232,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 11 — Integration and quality verification
 
-- [ ] Implement and verify.
+- [x] Implement and verify (see VERIFICATION.md for actual results and remaining manual checks).
 
 **Scope:** Run build and relevant tests; inspect timing, claims, reset, table/feed, keyboard behavior, contrast, labels, focus, 375px layout, cleanup, and console. Fix observed defects.
 
@@ -331,3 +331,5 @@ Replace placeholders before running commands. Stage relevant files only. Do not 
 - Commit reference:
 
 Target at least three real verified AI defects. If fewer were observed, state that fact; never invent defects, prompts, screenshots, or results. README must include setup/build/test commands and clearly explain that mock inventory is local to one demo session, not a production stock system.
+
+Final status: ten actual implementation commits precede the final verification commit. Task 12 documentation is completed except failure-audit updates explicitly excluded by the latest user request; its checkbox remains open for that limitation. Full screen-reader/WCAG review and real background-tab scheduling remain manual checks. See VERIFICATION.md. The final user request authorizes a normal push of Homework-3 only.

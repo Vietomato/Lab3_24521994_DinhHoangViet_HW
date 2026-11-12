@@ -540,3 +540,28 @@ Actual verification:
 - Tooling correction: the first browser script completed scroll/layout assertions but failed on the final empty-component mount because Vite's dependency interop exposed createRoot under default. Repeated empty mount with default/named fallback; passed. No app change needed.
 - NOT VERIFIED: full screen-reader/WCAG audit, Lighthouse and other engines. Pure helper checks and browser DOM checks are separate evidence. No lint script exists.
 - User explicitly authorized commit; working/staged diffs reviewed and generated files excluded. No push. Commit reference: commit containing this entry, titled `feat: add virtualized squad kill feed`.
+
+## Final verification and publication
+
+The earlier final-review request was partially completed before the user steered
+the task to a separate cross-project audit. Actual results: 52 tests passed,
+production build passed, production Edge browser integration passed, and
+Lighthouse 13.6.0 measured Accessibility 100/100 with no failed scored audits.
+Real background-tab scheduling and screen-reader speech remain unverified.
+The browser dependency/script had not yet been committed. No failed audit
+results or application defects were invented.
+
+Current exact user prompt:
+
+```text
+oke giờ commit những j thiếu của homework 3 lên github đi, trừ file failure_audit
+```
+
+- Authorized committing pending Homework 3 work and pushing Homework-3.
+- Excluded failure audit files from staging; root AI_failure_audit.md remains local.
+- Preserved the user's pending .gitignore change; added project-local Playwright dependency, lockfile and repeatable browser script.
+- Corrected stale README descriptions and recorded actual checks in VERIFICATION.md. No changes to failure audit files.
+- Re-ran `npm.cmd test` (52/52 PASS), `npm.cmd run build` (PASS) and `npm.cmd run test:browser` (PASS).
+- Default-sandbox remote inspection initially failed with schannel SEC_E_NO_CREDENTIALS; publication is attempted using elevated Git access next. No remote success is claimed before verification.
+- Commit reference: `chore: finalize arena verification and documentation`; actual hash and publication result reported after execution.
+- User explicitly excluded the cross-project audit prompts from this log; those prompts are not reproduced here.
