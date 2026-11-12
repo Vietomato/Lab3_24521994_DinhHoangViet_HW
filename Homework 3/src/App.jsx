@@ -5,6 +5,7 @@ import { validateFixtures } from './lib/validateFixtures.js';
 import DropCard from './components/DropCard.jsx';
 import DemoControls from './components/DemoControls.jsx';
 import Leaderboard from './components/Leaderboard.jsx';
+import KillFeed from './components/KillFeed.jsx';
 
 export default function App() {
   const [session, setSession] = useState(() => ({ ...createDemoSession(), version: 0 }));
@@ -47,7 +48,7 @@ export default function App() {
         </section>
         <section aria-labelledby="feed-heading">
           <h2 id="feed-heading">Kill feed mô phỏng</h2>
-          <p>Đã chuẩn bị {killEvents.length.toLocaleString('vi-VN')} sự kiện mô phỏng. Giao diện feed sẽ được kết nối sau.</p>
+          <KillFeed key={session.version} events={killEvents} squads={standings} />
         </section>
       </main>
       <footer className="container site-footer">

@@ -492,3 +492,51 @@ Actual verification:
 - PASS: headless Edge with existing sibling Playwright against local Vite server at 375x812: labels associated; mixed-case trimmed search finds Cerberus; unknown search yields spanning empty cell; killPts descending/ascending changes leaders; aria-sort follows direction; Space activates simulated update; no page-level horizontal overflow.
 - NOT VERIFIED: full screen-reader/WCAG audit, Lighthouse and other browsers. Pure selector tests do not verify DOM behavior; Edge checks are recorded separately. No lint script exists.
 - User explicitly authorized commit. Relevant diffs reviewed and generated files excluded. No push. Commit reference: commit containing this entry, titled `feat: add searchable and sortable squad leaderboard`.
+
+## 2026-11-12 — Virtualized squad kill feed
+
+Exact prompt received (literal escapes retained):
+
+```text
+Build a virtualized kill feed using the deterministic large fixture.\
+\
+Requirements:\
+\- Filter events by squad before calculating the virtual window.\
+\- Use a fixed documented row height, viewport height, and overscan.\
+\- Calculate visible start/end indexes from scrollTop.\
+\- Render only visible rows plus overscan.\
+\- Create total scroll height separately.\
+\- Use stable event IDs.\
+\- Clamp window boundaries.\
+\- Reset both DOM scroll position and scroll state when filters change.\
+\- Keep row content within the fixed height so offsets remain accurate.\
+\- Provide meaningful list semantics and a labeled keyboard-focusable scroll viewport.\
+\- Provide an empty-result state.\
+\- Do not render all events and hide them with CSS.\
+\- Avoid page-level horizontal overflow at 375px.\
+\
+Test first/last windows, empty results, large scroll offsets, filtering after scrolling, and bounded DOM row counts where browser tools are available.\
+\
+Update PROMPT_LOG.md, run relevant checks and the build, and commit:\
+feat: add virtualized squad kill feed
+```
+
+Work performed:
+
+- Started clean on Homework-3; reviewed rules, Task 10 and existing fixtures/App.
+- Added pure filter/window helpers: filter first, clamp scroll offsets, exclusive end, total spacer height and start offset. Documented 72px rows, 360px viewport and 3-row overscan.
+- Added KillFeed with useId-labeled filter, stable-ID ul/li rows, positional list metadata, labeled focusable viewport and empty message. Only a bounded slice is rendered; two clipped single-line text blocks keep fixed row geometry. No interactive recycled rows or feed live announcements.
+- Filter handler resets DOM scrollTop and state together. Session key resets the feed with the demo.
+- Added five pure tests and updated README/task status. No verified application defect discovered.
+
+Files changed: src/lib/virtual.js, src/components/KillFeed.jsx, src/App.jsx, src/index.css, tests/virtual.test.js, README.md, task_decomposition.md and PROMPT_LOG.md.
+
+Actual verification:
+
+- PASS: `npm.cmd test` — 52 tests, 52 passed, 0 failed. Five new checks cover first/last windows, empty/short lists, negative/huge/fractional offsets, bounded slice counts, filtering/immutability and invalid geometry.
+- PASS: `npm.cmd run build` — Vite 8.3.8, 28 transformed modules, exit 0.
+- PASS: Edge at 375x812 via existing sibling Playwright: first event 00001, huge scroll reaches 01200, <=12 rendered rows, filter after bottom resets DOM/state to first Cerberus event 00002 with aria-setsize=300; rows measure 72px; PageDown scrolls focused viewport; no page overflow.
+- PASS: separate Edge mount with empty events renders empty state and zero list rows.
+- Tooling correction: the first browser script completed scroll/layout assertions but failed on the final empty-component mount because Vite's dependency interop exposed createRoot under default. Repeated empty mount with default/named fallback; passed. No app change needed.
+- NOT VERIFIED: full screen-reader/WCAG audit, Lighthouse and other engines. Pure helper checks and browser DOM checks are separate evidence. No lint script exists.
+- User explicitly authorized commit; working/staged diffs reviewed and generated files excluded. No push. Commit reference: commit containing this entry, titled `feat: add virtualized squad kill feed`.

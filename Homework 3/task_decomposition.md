@@ -218,7 +218,7 @@ Progress (2026-11-12): React/Vite shell and deterministic fixtures are ready: tw
 
 ## Task 10 — Virtualized kill feed
 
-- [ ] Implement and verify.
+- [x] Implement and verify (five pure window/filter tests and Edge DOM/scroll/filter/empty/375px checks).
 
 **Scope:** Implement squad filtering and a fixed-row-height virtual window with overscan, total scroll space, stable IDs, and accessible scroll viewport. Reset scroll on filter changes.
 

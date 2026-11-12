@@ -31,7 +31,7 @@ simulated. No external API, credentials, backend or payment integration is used.
 
 `npm test` uses Node's built-in runner to verify fixture validity, reset timing,
 determinism and invalid-data rejection. No lint script exists. Claim service,
-virtual feed is pending. Full browser accessibility
+Full browser accessibility
 verification remains pending; limited card checks are recorded below.
 
 Drop cards now connect the timer to semantic articles and definition lists,
@@ -146,3 +146,24 @@ stream is used. Reset Demo also resets leaderboard scores/search/sort through
 the session key. Nine pure tests cover all metric/direction combinations, ties,
 search/empty results, immutability and deterministic updates. Edge checked the
 controls, keyboard refresh and 375px layout; a full accessibility audit is pending.
+
+## Virtual kill feed
+
+KillFeed filters the 1,200 deterministic events by squad before calculating a
+window. Fixed geometry: row height 72px, viewport height 360px, overscan 3 rows
+on each side. Each row contains two single-line blocks with 24px line-height,
+10px vertical padding and a border; long text is ellipsized and remains in the
+accessible text. CSS must preserve this geometry for correct offsets.
+
+The pure window helper clamps scrollTop, returns start/end (exclusive), total
+height and row offset. A separate spacer creates full scroll height; only the
+slice is rendered as a semantic ul/li list with stable event IDs and
+aria-posinset/aria-setsize. There are at most 12 rows for this geometry, not
+1,200 CSS-hidden rows. Rows are not interactive. The viewport is labeled,
+focusable and supports native keyboard scrolling without live announcements.
+
+Changing filters resets both DOM scrollTop and React scroll state. No-result
+data shows an empty message. Reset Demo remounts the feed too. Five pure tests
+cover boundaries, huge/fractional offsets, filters and empty lists. Edge checks
+verified first/last rows, bounded DOM, filter after scroll, 72px row geometry,
+PageDown, empty component rendering and 375px no page overflow.
